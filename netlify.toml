@@ -1,5 +1,5 @@
 [build]
-  command = "hugo"
+  command = "hugo --gc --minify -b "
   publish = "public"
 
 [build.environment]
@@ -24,4 +24,3 @@
   for = "index.xml"
   [headers.values]
     Content-Type = "application/rss+xml"
-
