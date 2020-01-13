@@ -26,4 +26,3 @@ url_pdf : "/files/clb.mld.2018.pdf"
 
 
 
-Full article may be found [here](https://github.com/debusklaneml/mldebusklane_website/blob/master/static/files/clb.mld.2018.pdf).

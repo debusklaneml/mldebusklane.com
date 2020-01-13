@@ -21,9 +21,8 @@ tags:
 - LPA
 title: "Middle school engagement profiles: Implications for motivation and T achievement in science"
 # Links (optional).
-url_pdf : "/files/clb.mld.2018.pdf"
+url_pdf : "/files/cb_mldl_LID_2019.pdf"
 ---
 
 
 
-Full article may be found [here](https://github.com/debusklaneml/mldebusklane_website/blob/master/static/files/clb.mld.2018.pdf).
