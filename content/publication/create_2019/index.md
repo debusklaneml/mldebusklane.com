@@ -1,7 +1,7 @@
 ---
-abstract: "This study identified engagement profiles among middle school students (N = 1125) in science, based on a global, behavioral, cognitive, and affective dimensions of engagement. The relationships between engagement profiles and key motivation predictors (science achievement goal orientations and self-efficacy) and student achievement in science were also examined. Latent profile analysis revealed five distinct science engagement profiles, including Moderately Engaged, Moderately Disengaged, Disengaged, Behaviorally Engaged, and Behaviorally Disengaged. Controlling for grade, gender, and minority status, results showed that mastery or- ientation and self-efficacy significantly predicted the likelihood of membership in profiles characterized by higher engagement in science. As expected, the Moderately Engaged and Behaviorally Engaged profiles were associated with higher achievement in science, and the reverse pattern was found for the Moderately Disengaged and Disengaged profiles. Our results support the utility of examining multidimensional engagement profiles, and the implications of these profiles for students' motivation and learning in science are discussed."
+abstract: "Creative thinking shares many characteristics with traditional complex tasks. We investigated whether implicit theories of creativity would affect creative thinking in a way similar to the impact of implicit theories of intelligence on academic tasks. We altered participants’ theories of creativity to be either more incremental or more entity-like. We also examined the impact of working memory (WM) and cognitive load on creative thinking. Cognitive load fully mediated the relationship between implicit theories and creative thinking, with more incremental beliefs linked to lower cognitive load. In addition, cognitive load partially mediated the relationship between WM and creative thinking. Our results support prior research showing that creative thinking draws on cognitive mechanisms similar to those utilized by other complex tasks, but the impact of implicit theories on creative thinking differs from their effect on traditional academic tasks."
 authors: [Jenni Redifer, Christine Bae & M. L. DeBusk-Lane]
-date: "2019-01"
+date: "2019-01-01"
 doi: "https://doi.org/10.1177/2158244019835919"
 featured: false
 image:
@@ -14,7 +14,7 @@ publication: "*SAGE Open*"
 publication_short: ""
 publication_types:
 - "2"
-publishDate: "2019-01"
+publishDate: "2019-01-01"
 summary: Can a student's perception of their creative abilities be changed?.
 tags:
 - Motivation
