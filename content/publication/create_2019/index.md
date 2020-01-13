@@ -15,7 +15,7 @@ publication_short: ""
 publication_types:
 - "2"
 publishDate: "2019-01-01"
-summary: Can a student's perception of their creative abilities be changed?.
+summary: Can a student's perception of their creative abilities be changed?
 tags:
 - Motivation
 - LPA
