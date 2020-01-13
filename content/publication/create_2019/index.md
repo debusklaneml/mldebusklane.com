@@ -14,7 +14,7 @@ publication: "*SAGE Open*"
 publication_short: ""
 publication_types:
 - "2"
-publishDate: "2019-01-01"
+publishDate: "2019-01-02"
 summary: Can a student's perception of their creative abilities be changed?
 tags:
 - Motivation
