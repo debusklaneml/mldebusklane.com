@@ -24,7 +24,7 @@ library(skimr)
 library(knitr)
 ```
 
-This week's tidytuesday data comes from [Pro Football Reference](https://www.pro-football-reference.com/years/2019/attendance.htm) and includes attendance, standings, and game stats for each game. Well do a quick EDA and generate a few ideas of what might be interesting to look at. 
+This week's tidytuesday data comes from [Pro Football Reference](https://www.pro-football-reference.com/years/2019/attendance.htm) and includes attendance, standings, and game stats for each game. Well do a quick EDA and generate a few ideas of what might be interesting to look at. As a note, I stopped this one once I started to dive into predictives, as I simply ran out of time for this week. I'll catch this up one day.... perhaps. 
 
 
 ```{r, results = FALSE, warning= FALSE, message=FALSE}
