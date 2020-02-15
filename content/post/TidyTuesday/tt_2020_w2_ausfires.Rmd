@@ -21,11 +21,12 @@ output:
   html_document:
     theme: journal
     highlight: zenburn
+
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
                       echo = TRUE, dpi = 300, cache.lazy = FALSE,
-                      tidy = "styler", fig.width = 8, fig.height = 7)
+                      fig.width = 8, fig.height = 7)
 ```
 
 This week's TidyTuesday post was brought out by the fires in Austrailia! 
@@ -87,7 +88,7 @@ yearly <- temp_rain %>%
 
 Generate a way to look at these data!
 
-```{r}
+```{r, fig.height= 10, fig.width= 14}
 temp_dark <- ggplot(yearly, aes(x = year, y = temp)) +
   geom_errorbar(aes(ymin=l_se, ymax=u_se), color = "#726A6A", alpha = .2) +
   geom_point(aes(size = rain, color = temp)) +

@@ -126,7 +126,7 @@ my_theme <- function() {
 
 # Build the plot! 
 
-```{r}
+```{r, fig.height=8, fig.width=13}
 #Bump Chart - derived from code provided by @parkermquinn 
 bump <- ed_research_rank %>%
   ggplot(aes(year, ranking, group = field)) + 
@@ -141,7 +141,7 @@ bump <- ed_research_rank %>%
   geom_text(data = ed_research_rank %>% filter(year == 2017),
             aes(label = field, x = 2017.2) , hjust = 0, fontface = "bold", color = "#888888", size = 3) + 
   scale_color_manual(values = c(Down = "#D8B365", Up = "#5AB4AC", None = "gray", EdPsych = "#FA8072")) + 
-  labs(x = "Year", y = "Popularity rank", title = "Educational Research PhDs awarded by field")
+  labs(x = "Year", y = "Popularity Rank", title = "Educational Research PhDs Awarded by Field")
 
 bump
 ```
