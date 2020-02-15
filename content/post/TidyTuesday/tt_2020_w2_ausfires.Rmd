@@ -8,7 +8,7 @@ tags:
   - R
   - TidyTuesday
 subtitle: ''
-summary: 'Educational research PhD trends over the past 10 years. Marked increases in inst.tech and policy analysis. Declines in some interesting areas. Thank you for the code @parkermquinn'
+summary: 'A look at the average yearly temperature and rainfall since 1910'
 authors: []
 lastmod: '2020-01-04T07:57:09-05:00'
 featured: no
