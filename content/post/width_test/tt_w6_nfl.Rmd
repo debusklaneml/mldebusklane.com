@@ -1,0 +1,264 @@
+---
+title: "tidytuesday - NFL Data - Week 6"
+author: "MLDL"
+date: "2/6/2020"
+output: 
+  html_document:
+    theme: journal
+    highlight: zenburn
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
+                      tidy = "styler", fig.width = 8, fig.height = 7)
+```
+
+```{r, results = FALSE, message=FALSE}
+library(tidyverse)
+library(janitor)
+library(readxl)
+#library(tidylog)
+library(skimr)
+library(knitr)
+```
+
+This week's tidytuesday data comes from [Pro Football Reference](https://www.pro-football-reference.com/years/2019/attendance.htm) and includes attendance, standings, and game stats for each game. Well do a quick EDA and generate a few ideas of what might be interesting to look at. 
+
+
+```{r, results = FALSE, warning= FALSE, message=FALSE}
+# Import the data from tidytuesday: https://github.com/rfordatascience/tidytuesday
+
+attendance <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-04/attendance.csv')
+standings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-04/standings.csv')
+games <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-04/games.csv')
+```
+
+First, lets take a look at the data and see what it can tell us at face value. 
+
+***
+### The attendance dataset
+***
+```{r}
+kable(head(attendance))
+```
+
+
+```{r}
+attendance %>%
+  skim()
+```
+
+We certainly have some interesting statistics here to mess with. It looks like the 'total,' 'home,' and 'away' attendance columns represent the entire season, while the 'weekly_attendance' field is for each week. Therefore, it looks like each row is a game. So there should be some variability in how many rows there are amongst the teams, as some make it to the playoff and some do not (therefore they'd have more games). A look at the summary statistics should tell us more... if that is the case or not. 
+
+So, as was expected, there does seem to be some variability associated with how many games they play. Not to worry, I'll probably stay away from analyzing just that, and focus on either more aggregated descriptives or simply other statistics herein. 
+
+***
+### The standings dataset
+***
+
+```{r}
+kable(head(standings))
+```
+
+
+```{r}
+standings %>% 
+  skim()
+```
+
+So, look at this snapshot of the data, there seems to be all kinds of interesting statistics between attendance and what appears to be by team year statistics. 
+
+***
+### The games dataset
+***
+
+```{r}
+kable(head(games))
+```
+
+
+From this vantage, it looks like I could connect the team name from the attendance data to the home team of the games data. To do so, I'll have to make a key that matches. Most readily, it looks like I'll need to combine a few the 'team' and 'team_name' columns in the attendance data. 
+
+```{r}
+att_reshape <- attendance %>% 
+  mutate(t_name = str_c(team, team_name, sep = " ")) %>%
+  select(-team, -team_name)
+
+# to merge these datasets, I needed 'week' to be numeric on both... 
+# and for whatever reason it was a character field to begin with...
+games <- games %>%
+  mutate(week = as.numeric(week))
+
+att_games <- left_join(att_reshape, games, 
+                       by = c('t_name' = 'home_team', 'year' = 'year', 'week' = 'week'))
+
+kable(head(att_games))
+```
+
+At first glance it looks like there is a bunch of missing data, but because I merged on the home team, almost all the missingness appears to be related to the team is away or if they had a by week. Which makes it less alarming... I was alarmed at first... "did my join work?"
+
+Nevertheless, I think we're almost at a point to start visualizing stuff. It would be helpful to have a column identifying if a team is home or away... just so I can sort on it later. 
+
+```{r}
+att_games_ha <- att_games %>%
+  mutate(away_team_ind = if_else(is.na(away_team) & !is.na(weekly_attendance), 1, 0),
+         away_team_ind = case_when(
+           is.na(weekly_attendance) ~ 9999,
+           TRUE ~ away_team_ind))
+```
+
+So, by doing all of this, I can see trends across time of how well a team does in terms of attendance between home and away games. 
+
+Lets take a look. 
+
+```{r}
+chiefs <- att_games_ha %>%
+  filter(t_name == "Kansas City Chiefs") 
+
+chiefs_gg <- chiefs %>%
+  filter(away_team_ind != 9999) %>%
+  group_by(year, week, away_team_ind) %>%
+  summarize(average_att = mean(weekly_attendance)) %>%
+  ggplot(aes(x = year, y = average_att)) +
+  geom_point() + 
+  facet_wrap(~away_team_ind)
+
+chiefs_gg
+```
+
+Well, that's interesting... but I wonder if the obvious dip in at home attendance between ~2007 and ~2013 is simply a localized artifact to the Chiefs. 
+
+```{r, fig.width=12, fig.height=12}
+
+all_gg <- att_games_ha %>%
+  filter(away_team_ind != 9999) %>%
+  group_by(t_name, year, away_team_ind) %>%
+  summarize(average_att = mean(weekly_attendance)) %>% ungroup() %>%
+  ggplot(aes(x = year, y = average_att, color = as.factor(away_team_ind))) +
+  geom_point() + 
+  facet_wrap(~t_name) + 
+  theme(legend.position = "top")
+
+all_gg
+```
+
+So obviously, each team has a fairly unique pattern of attendance, especially between home and away games. You can also see where some teams got a new stadium that pushed attendance up, such as the Dallas Cowboys. 
+
+```{r, fig.width=12,  fig.height=12}
+gg1 <- att_games_ha %>%
+  filter(away_team_ind != 9999) %>%
+  group_by(t_name, year, week, away_team_ind) %>%
+  summarize(average_att = mean(weekly_attendance)) %>%
+  ggplot(aes(t_name, average_att, color = as.factor(away_team_ind))) +
+  geom_boxplot(outlier.alpha = .5) + 
+  coord_flip() + 
+  theme(legend.position = "top")
+
+gg1
+```
+
+Although both the previous graph do not exhibit any clear reoccuring or dicernable trends, it makes me wonder what the relationship between home attendance and season performance is. Said another way, does a strong home team crowd during the first half of the season, relate to eventual success? 
+
+Lets take a look. 
+
+```{r}
+standings <- standings %>%
+  mutate(t_name = str_c(team, team_name, sep = " "))
+  
+predict_1 <- att_games_ha %>%
+  filter(!is.na(away_team),
+         week < 8) %>%
+  group_by(year, t_name) %>%
+  summarize(avg.att = mean(weekly_attendance)) %>% ungroup() %>%
+  left_join(standings, by = c("year", "t_name")) %>%
+  mutate(perc.win = wins/(wins+loss))
+
+cor(predict_1$avg.att, predict_1$perc.win) #this is not promissing, but lets visualize
+
+```
+
+```{r}
+predict_1_gg <- predict_1 %>%
+  ggplot(aes(x = perc.win, y = avg.att)) + 
+  geom_point() 
+
+predict_1_gg
+```
+
+So much variability. I would assume this is because each team has different stadium sizes, and therefore the y-axis is not relative across teams. Lets see if we can control this. 
+
+Let's first create a function to normalize data within group (year, team)
+
+```{r}
+zscore <- function(m){
+  (m - mean(m)) / sd(m)
+}
+```
+
+Group it and then lets see how things relate. 
+
+```{r}
+# Full season results were used, although home and away games' attendance will count for more than one team at a time. 
+
+predict_2 <- att_games_ha %>%
+  # filter(!is.na(away_team)) %>%
+  filter(!is.na(weekly_attendance)) %>%
+  group_by(year, t_name) %>%
+  mutate(avg.att = zscore(weekly_attendance)) %>% ungroup() %>%
+  left_join(standings, by = c("year", "t_name")) %>%
+  mutate(perc.win = wins/(wins+loss)) %>%
+  # filter(week < 8) %>%
+  # filter(week > 4 & week < 10) %>% #trying out different perspectives
+  # filter(week > 8) %>%
+  group_by(year, t_name, perc.win) %>%
+  summarize(avg_first_half = mean(avg.att)) %>% ungroup()
+```
+Lets take a look now.
+
+```{r}
+predict_2_gg <- predict_2 %>%
+  ggplot(aes(x = perc.win, y = avg_first_half)) + 
+  geom_point() + 
+  geom_smooth(method = "auto")
+  
+  # geom_point() + 
+  # geom_smooth(stat = "smooth")
+
+predict_2_gg
+```
+
+Although first half season attendance does not seem to be extensively predictive, perhaps there are other indicators that could help improve this model. Lets look a bit deeper here. 
+
+```{r}
+cor(predict_2$perc.win, predict_2$avg_first_half, method = "pearson")
+
+
+lm1 <- lm(data = predict_2, perc.win ~ avg_first_half)
+broom::tidy(lm1)
+broom::glance(lm1)
+```
+
+```{r}
+lm2 <- lm(data = predict_2, perc.win ~ year + avg_first_half + year*avg_first_half)
+broom::tidy(lm2)
+broom::glance(lm2)
+```
+
+```{r}
+predict_3 <- predict_2 %>%
+  left_join(standings, by = c("year", "t_name"))
+
+lm3 <- lm(data = predict_3, perc.win ~ year + avg_first_half + points_for)
+broom::tidy(lm3)
+broom::glance(lm3)
+```
+
+
+
+
+
+
+
+
