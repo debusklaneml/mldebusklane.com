@@ -1,7 +1,22 @@
 ---
 title: "TidyTuesday - NFL Data - 2020 - Wk 6"
-author: "MLDL"
-date: "2/6/2020"
+author: admin
+date: '2020-02-13'
+slug:  
+categories: [Code]
+tags:
+  - R
+  - TidyTuesday
+subtitle: ''
+summary: 'A look at the average yearly temperature and rainfall since 1910'
+authors: [M. L. DeBusk-Lane]
+lastmod: '2020-01-04T07:57:09-05:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
 output: 
   html_document:
     theme: journal
@@ -108,7 +123,7 @@ games &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascien
 <pre class="r"><code>attendance %&gt;%
   skim()</code></pre>
 <table>
-<caption>Data summary</caption>
+<caption><span id="tab:unnamed-chunk-4">Table 1: </span>Data summary</caption>
 <tbody>
 <tr class="odd">
 <td align="left">Name</td>
@@ -419,7 +434,7 @@ games &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascien
 <pre class="r"><code>standings %&gt;% 
   skim()</code></pre>
 <table>
-<caption>Data summary</caption>
+<caption><span id="tab:unnamed-chunk-6">Table 2: </span>Data summary</caption>
 <tbody>
 <tr class="odd">
 <td align="left">Name</td>
@@ -1055,7 +1070,7 @@ chiefs_gg &lt;- chiefs %&gt;%
   facet_wrap(~away_team_ind)
 
 chiefs_gg</code></pre>
-<p><img src="/post/width_test/tt_w6_nfl_files/figure-html/unnamed-chunk-10-1.png" width="2400" /></p>
+<p><img src="/post/TidyTuesday/tt_2020_w6_nfl_files/figure-html/unnamed-chunk-10-1.png" width="2400" /></p>
 <p>Well, that’s interesting… but I wonder if the obvious dip in at home attendance between ~2007 and ~2013 is simply a localized artifact to the Chiefs.</p>
 <pre class="r"><code>all_gg &lt;- att_games_ha %&gt;%
   filter(away_team_ind != 9999) %&gt;%
@@ -1067,7 +1082,7 @@ chiefs_gg</code></pre>
   theme(legend.position = &quot;top&quot;)
 
 all_gg</code></pre>
-<p><img src="/post/width_test/tt_w6_nfl_files/figure-html/unnamed-chunk-11-1.png" width="3600" /></p>
+<p><img src="/post/TidyTuesday/tt_2020_w6_nfl_files/figure-html/unnamed-chunk-11-1.png" width="3600" /></p>
 <p>So obviously, each team has a fairly unique pattern of attendance, especially between home and away games. You can also see where some teams got a new stadium that pushed attendance up, such as the Dallas Cowboys.</p>
 <pre class="r"><code>gg1 &lt;- att_games_ha %&gt;%
   filter(away_team_ind != 9999) %&gt;%
@@ -1079,7 +1094,7 @@ all_gg</code></pre>
   theme(legend.position = &quot;top&quot;)
 
 gg1</code></pre>
-<p><img src="/post/width_test/tt_w6_nfl_files/figure-html/unnamed-chunk-12-1.png" width="3600" /></p>
+<p><img src="/post/TidyTuesday/tt_2020_w6_nfl_files/figure-html/unnamed-chunk-12-1.png" width="3600" /></p>
 <p>Although both the previous graph do not exhibit any clear reoccuring or dicernable trends, it makes me wonder what the relationship between home attendance and season performance is. Said another way, does a strong home team crowd during the first half of the season, relate to eventual success?</p>
 <p>Lets take a look.</p>
 <pre class="r"><code>standings &lt;- standings %&gt;%
@@ -1100,7 +1115,7 @@ cor(predict_1$avg.att, predict_1$perc.win) #this is not promissing, but lets vis
   geom_point() 
 
 predict_1_gg</code></pre>
-<p><img src="/post/width_test/tt_w6_nfl_files/figure-html/unnamed-chunk-14-1.png" width="2400" /></p>
+<p><img src="/post/TidyTuesday/tt_2020_w6_nfl_files/figure-html/unnamed-chunk-14-1.png" width="2400" /></p>
 <p>So much variability. I would assume this is because each team has different stadium sizes, and therefore the y-axis is not relative across teams. Lets see if we can control this.</p>
 <p>Let’s first create a function to normalize data within group (year, team)</p>
 <pre class="r"><code>zscore &lt;- function(m){
@@ -1131,7 +1146,7 @@ predict_2 &lt;- att_games_ha %&gt;%
   # geom_smooth(stat = &quot;smooth&quot;)
 
 predict_2_gg</code></pre>
-<p><img src="/post/width_test/tt_w6_nfl_files/figure-html/unnamed-chunk-17-1.png" width="2400" /></p>
+<p><img src="/post/TidyTuesday/tt_2020_w6_nfl_files/figure-html/unnamed-chunk-17-1.png" width="2400" /></p>
 <p>Although first half season attendance does not seem to be extensively predictive, perhaps there are other indicators that could help improve this model. Lets look a bit deeper here.</p>
 <pre class="r"><code>cor(predict_2$perc.win, predict_2$avg_first_half, method = &quot;pearson&quot;)</code></pre>
 <pre><code>## [1] 0.0536111</code></pre>

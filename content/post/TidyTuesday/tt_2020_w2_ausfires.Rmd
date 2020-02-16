@@ -3,13 +3,13 @@ title: "TidyTuesday - Austrailian Fires - 2020 - Wk 2"
 author: admin
 date: '2020-02-13'
 slug:  
-categories: []
+categories: [Code]
 tags:
   - R
   - TidyTuesday
 subtitle: ''
 summary: 'A look at the average yearly temperature and rainfall since 1910'
-authors: []
+authors: [M. L. DeBusk-Lane]
 lastmod: '2020-01-04T07:57:09-05:00'
 featured: no
 image:
