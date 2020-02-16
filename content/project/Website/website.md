@@ -25,4 +25,4 @@ tags:
 - Rmarkdown
 ---
 
-This is the website you're viewing right now. Follow the github link above to access to the code. Fork it is you enjoy and would like to make it your own! Cheers!
+This is the website you're viewing right now! Follow the github link above to access to the code. Fork it is you enjoy and would like to make it your own! Cheers!
