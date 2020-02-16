@@ -1,7 +1,7 @@
 ---
 aliases: [arm]
-title: R & Python - `reticulate`
-summary: A basic rundown of how to set up the `reticulate` package. 
+title: Academic - Hugo Website Build
+summary: This is what you are viewing... right now.  
 abstract: ""
 date: "2020-02-15T00:00:00Z"
 image:
@@ -14,16 +14,15 @@ links:
   url: 
 - icon: github
   icon_pack: fab
-  name: materials
-  url: 
+  name: Code
+  url: https://github.com/debusklaneml/mldebusklane.com
 
 categories:
-- workshop
+- R
 tags:
 
 - R
-- Python
-- rmarkdown
+- Rmarkdown
 ---
 
-This is just a placeholder... getting projects set up now. 
+This is the website you're viewing right now. Follow the github link above to access to the code. Fork it is you enjoy. Cheers!

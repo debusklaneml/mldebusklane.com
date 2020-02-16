@@ -32,7 +32,15 @@ subtitle = ""
    [[content.filter_button]]
      name = "Python"
      tag = "Python"
+     
+   [[content.filter_button]]
+     name = "Packages"
+     tag = "Packages"    
 
+   [[content.filter_button]]
+     name = "Functions"
+     tag = "Functions" 
+     
 [design]
   # Choose how many columns the section has. Valid values: 1 or 2.
   columns = "1"
