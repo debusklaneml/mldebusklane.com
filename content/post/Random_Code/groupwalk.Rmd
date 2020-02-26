@@ -32,7 +32,6 @@ I ran across this little gem at work today trying to build a function to easily 
 
 ```{r, message=FALSE}
 library(tidyverse)
-library(janitor)
 library(writexl)
 ```
 
