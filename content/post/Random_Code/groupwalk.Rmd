@@ -6,7 +6,7 @@ slug:
 categories: [Code]
 tags:
   - R
-  - Random Code
+  - RandomCode
 subtitle: ''
 summary: 'How to write multiple excel files from an identifer column'
 authors: [M. L. DeBusk-Lane]
