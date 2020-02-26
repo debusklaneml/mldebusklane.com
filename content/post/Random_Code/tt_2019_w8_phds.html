@@ -1,0 +1,269 @@
+---
+title: TidyTuesday - PhDs - 2019 - Wk 8
+author: admin
+date: '2020-02-13'
+slug:  
+categories: [Code]
+tags:
+  - R
+  - TidyTuesday
+subtitle: ''
+summary: 'Educational research PhD trends over the past 10 years. Marked increases in inst.tech and policy analysis. Declines in some interesting areas. Thank you for the code @parkermquinn'
+authors: [M. L. DeBusk-Lane]
+lastmod: '2020-01-04T07:57:09-05:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+output: 
+  html_document:
+    theme: journal
+    highlight: zenburn
+---
+
+
+
+<p>This post, which is obviously an older <a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2019">TidyTuesday</a> creation. New webpage, adding old stuff periodically. Enjoy.</p>
+<pre class="r"><code>library(tidyverse)
+library(janitor)
+library(readxl)
+library(skimr)</code></pre>
+<div id="get-the-data" class="section level1">
+<h1>Get the data!</h1>
+<pre class="r"><code>phd_field &lt;- readr::read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-02-19/phd_by_field.csv&quot;)
+
+#get the gist
+skim(phd_field)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-2">Table 1: </span>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">phd_field</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">3370</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">5</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">numeric</td>
+<td align="left">2</td>
+</tr>
+<tr class="even">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">broad_field</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">5</td>
+<td align="right">33</td>
+<td align="right">0</td>
+<td align="right">7</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">major_field</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">7</td>
+<td align="right">53</td>
+<td align="right">0</td>
+<td align="right">25</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">field</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3</td>
+<td align="right">69</td>
+<td align="right">0</td>
+<td align="right">336</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+<th align="left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">year</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">2012.5</td>
+<td align="right">2.87</td>
+<td align="right">2008</td>
+<td align="right">2010</td>
+<td align="right">2012.5</td>
+<td align="right">2015</td>
+<td align="right">2017</td>
+<td align="left">▇▇▇▇▇</td>
+</tr>
+<tr class="even">
+<td align="left">n_phds</td>
+<td align="right">278</td>
+<td align="right">0.92</td>
+<td align="right">165.9</td>
+<td align="right">337.48</td>
+<td align="right">0</td>
+<td align="right">41</td>
+<td align="right">85.0</td>
+<td align="right">178</td>
+<td align="right">5302</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="wrangle-the-data" class="section level1">
+<h1>Wrangle the data!</h1>
+<pre class="r"><code>ed &lt;- phd_field %&gt;%
+  filter(broad_field == &quot;Education&quot;)
+
+#filter to research field and clean up names a bit
+ed_research_rank &lt;- ed %&gt;%
+  filter(major_field == &quot;Education research&quot;) %&gt;%
+  select(-broad_field, -major_field) %&gt;%
+  spread(field, n_phds) %&gt;% #just to rename
+  clean_names() %&gt;%
+  rename(Counseling = starts_with(&quot;Counseling&quot;),
+         &#39;Curriculum and Inst&#39; = starts_with(&quot;curriculum&quot;),
+         &#39;Ed Inst Media Design&#39; = starts_with(&quot;educational_and_instructional_media_design&quot;),
+         &#39;Instructional Tech&#39; = starts_with(&quot;educational_and_instructional_technology&quot;),
+         &#39;Measurement&#39; = starts_with(&quot;educational_assessment&quot;),
+         &#39;Policy Analysis&#39; = starts_with(&quot;educational_policy&quot;),
+         &#39;Ed Psych&#39; = starts_with(&quot;educational_psy&quot;),
+         &#39;Ed Stat Research Meth&#39; = starts_with(&quot;educational_statistics&quot;),
+         &#39;Ed Eval &amp; Research&#39; = starts_with(&quot;higher_education_eval&quot;),
+         &#39;Intern Ed&#39; = starts_with(&quot;international&quot;),
+         &#39;School Psych&#39; = starts_with(&quot;school_psychology&quot;),
+         &#39;Foundations of Ed&#39; = starts_with(&quot;social_and_phil&quot;),
+         &#39;Special Ed&#39; = starts_with(&quot;special_ed&quot;)) %&gt;%
+  gather(&#39;Counseling&#39;:&#39;Special Ed&#39;, key = field, value = n_phds) %&gt;%
+  group_by(year, field) %&gt;%
+  summarise(tot_phds = sum(na.omit(n_phds))) %&gt;%
+  arrange(year, desc(tot_phds)) %&gt;%
+  mutate(ranking = row_number())
+
+down_field &lt;- c(&quot;Ed Inst Media Design&quot;, &quot;Foundations of Ed&quot;, &quot;Measurement&quot;)
+up_field &lt;- c(&quot;Policy Analysis&quot;, &quot;Instructional Tech&quot;)
+
+ed_research_rank &lt;- ed_research_rank %&gt;%
+  mutate(swing = ifelse(field %in% down_field, &quot;Down&quot;, ifelse(field %in% up_field, &quot;Up&quot;, ifelse(field == &quot;Ed Psych&quot;, &quot;EdPsych&quot;, &quot;None&quot;))))</code></pre>
+</div>
+<div id="set-the-theme" class="section level1">
+<h1>Set the theme!</h1>
+<pre class="r"><code>#Also stole this from Parker.
+my_theme &lt;- function() {
+  
+  # Colors
+  color.background = &quot;#f5f5f2&quot;
+  color.text = &quot;#22211d&quot;
+  
+  # Begin construction of chart
+  theme_bw(base_size=15) +
+    
+    # Format background colors
+    theme(panel.background = element_rect(fill=color.background, color=color.background)) +
+    theme(plot.background  = element_rect(fill=color.background, color=color.background)) +
+    theme(panel.border     = element_rect(color=color.background)) +
+    theme(strip.background = element_rect(fill=color.background, color=color.background)) +
+    
+    # Format the grid
+    theme(panel.grid.major.y = element_blank()) +
+    theme(panel.grid.minor.y = element_blank()) +
+    theme(axis.ticks       = element_blank()) +
+    
+    # Format the legend
+    theme(legend.position = &quot;none&quot;) +
+    
+    # Format title and axis labels
+    theme(plot.title       = element_text(color=color.text, size=20, face = &quot;bold.italic&quot;)) +
+    theme(plot.subtitle    = element_text(color=color.text, size=12, face = &quot;italic&quot;)) + 
+    theme(axis.title.x     = element_text(size=14, color=&quot;black&quot;, face = &quot;bold&quot;)) +
+    theme(axis.title.y     = element_text(size=14, color=&quot;black&quot;, face = &quot;bold&quot;, vjust=1.25)) +
+    theme(axis.text.x      = element_text(size=10, vjust=0.5, hjust=0.5, color = color.text)) +
+    theme(axis.text.y      = element_text(size=10, color = color.text)) +
+    theme(strip.text       = element_text(face = &quot;bold&quot;)) +
+    
+    # Plot margins
+    theme(plot.margin = unit(c(0.35, 0.2, 0.3, 0.35), &quot;cm&quot;))
+}  </code></pre>
+</div>
+<div id="build-the-plot" class="section level1">
+<h1>Build the plot!</h1>
+<pre class="r"><code>#Bump Chart - derived from code provided by @parkermquinn 
+bump &lt;- ed_research_rank %&gt;%
+  ggplot(aes(year, ranking, group = field)) + 
+  geom_line(aes(color = swing, alpha = .9), size = 2) + 
+  geom_point(aes(color = swing, alpha = .9, size = tot_phds)) + 
+  geom_point(color = &quot;#FFFFFF&quot;, size = .6) + 
+  scale_y_reverse(breaks = c(1,2,3,4,5,6,7,8,9,10,11,12,13)) + 
+  my_theme() +
+  scale_x_continuous(breaks = 2008:2017, minor_breaks = 2008:2017, limits = c(2007, 2018)) + 
+  geom_text(data = ed_research_rank %&gt;% filter(year == 2008),
+            aes(label = field, x = 2007.8) , hjust = 1, fontface = &quot;bold&quot;, color = &quot;#888888&quot;, size = 3) +
+  geom_text(data = ed_research_rank %&gt;% filter(year == 2017),
+            aes(label = field, x = 2017.2) , hjust = 0, fontface = &quot;bold&quot;, color = &quot;#888888&quot;, size = 3) + 
+  scale_color_manual(values = c(Down = &quot;#D8B365&quot;, Up = &quot;#5AB4AC&quot;, None = &quot;gray&quot;, EdPsych = &quot;#FA8072&quot;)) + 
+  labs(x = &quot;Year&quot;, y = &quot;Popularity Rank&quot;, title = &quot;Educational Research PhDs Awarded by Field&quot;)
+
+bump</code></pre>
+<p><img src="/post/Random_Code/tt_2019_w8_phds_files/figure-html/unnamed-chunk-5-1.png" width="3900" /></p>
+</div>
