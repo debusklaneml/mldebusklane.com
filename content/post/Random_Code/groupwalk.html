@@ -29,7 +29,7 @@ output:
 <pre class="r"><code>library(tidyverse)
 library(janitor)
 library(writexl)</code></pre>
-<p>For this short post I’ll simply use the fairly famous iris dataset to demonstrate.</p>
+<p>Let’s grab some data.</p>
 <pre class="r"><code>data(iris)</code></pre>
 <p>Let’s take a look.</p>
 <pre class="r"><code>iris %&gt;% 
@@ -183,6 +183,6 @@ library(writexl)</code></pre>
 <div id="group_walk-group_map" class="section level1">
 <h1>group_walk (group_map)</h1>
 <p>Next, the <code>group_walk</code> function, which is an extension of the <code>group_map</code> series (more info <a href="https://dplyr.tidyverse.org/reference/group_map.html">here</a>) that mimics many <code>purrr</code> functions, except through a series of groups… not just a list, df columsn, or some type of nest.</p>
-<p>Identical to the other <code>walk</code> functions that are used for their ‘side effects’ (think output, not what it returns… ), the <code>group_walk</code> function silently returns the <code>.x</code> argument. We’re interested in what it does, not the data it may produce. Afterall, I just want the output of the function. I plan to dive into this in a future <code>map</code> post in the future… it can be confusing.</p>
+<p>Identical to the other <code>walk</code> functions that are used for their ‘side effects’ (think output, not what it returns… ), the <code>group_walk</code> function silently returns the <code>.x</code> argument. We’re interested in what it does, not the data it may produce. Afterall, I just want the output of the function. I plan to dive into this in a future <code>map</code> post in the future… it can be confusing. Nicely, the <code>group_walk</code> function also includes an option to keep the grouping variable through the <code>keep =</code> option that retains the variable in each <code>.x</code>.</p>
 <p>To wrap this up, the <code>paste0</code> function serves to meet the second argument requirement for <code>write_xlsx</code>. If you’re not familiar with paste0/paste, it simply combindes all arguments together. In this case, it is simply taking the string prefix “iris_,” each <code>Species</code>, and “.xlsx” and concatenates them.</p>
 </div>

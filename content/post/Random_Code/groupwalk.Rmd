@@ -36,7 +36,7 @@ library(janitor)
 library(writexl)
 ```
 
-For this short post I'll simply use the fairly famous iris dataset to demonstrate. 
+Let's grab some data. 
 
 ```{r}
 data(iris)
@@ -69,6 +69,6 @@ To walk through this a bit, you'll notice a simple `group_by` function that serv
 
 Next, the `group_walk` function, which is an extension of the `group_map` series (more info [here](https://dplyr.tidyverse.org/reference/group_map.html)) that mimics many `purrr` functions, except through a series of groups... not just a list, df columsn, or some type of nest. 
 
-Identical to the other `walk` functions that are used for their 'side effects' (think output, not what it returns... ), the `group_walk` function silently returns the `.x` argument. We're interested in what it does, not the data it may produce. Afterall, I just want the output of the function. I plan to dive into this in a future `map` post in the future... it can be confusing. 
+Identical to the other `walk` functions that are used for their 'side effects' (think output, not what it returns... ), the `group_walk` function silently returns the `.x` argument. We're interested in what it does, not the data it may produce. Afterall, I just want the output of the function. I plan to dive into this in a future `map` post in the future... it can be confusing. Nicely, the `group_walk` function also includes an option to keep the grouping variable through the `keep =` option that retains the variable in each `.x`. 
 
 To wrap this up, the `paste0` function serves to meet the second argument requirement for `write_xlsx`. If you're not familiar with paste0/paste, it simply combindes all arguments together. In this case, it is simply taking the string prefix "iris_," each `Species`, and ".xlsx" and concatenates them. 
