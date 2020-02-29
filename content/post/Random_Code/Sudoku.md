@@ -1,5 +1,5 @@
---- 
-title: Sudoku Solver in Python
+---
+title: Sudoku Solver in Python 
 author: admin
 date: '2020-02-28'
 slug:  
@@ -23,19 +23,14 @@ output:
     highlight: zenburn
 ---
 
-
-# Solving Sudoku Puzzles with Python
- 
 Interestingly I'm writing this blog post through JupyterLab, as opposed to strictly through R. Reason being, RStudio and the reticulate package have a bit of development left to go before knitr, rmarkdown, and RStudio work well together (you can reference this issue that I had a problem with [here](https://github.com/yihui/knitr/issues/1505). 
-
+ 
 Nevertheless, I'm still hosting this markdown document from JupyterLab to markdown and then through my own Academic Hugo webpage through RStudio... its a party really. 
 
-
+ 
 So, let's start. The point of this was to learn a bit more about how Python iterates and how something comparable can be handled in R. In doing so, there are some particulars that I'll touch on, but I would certainly say there is benefit of diving in yourself and writing it out. There is bound to be something you can learn by doing so. 
-
-
-![title](sudoku.png)
-
+ 
+![sudoku](https://raw.githubusercontent.com/debusklaneml/mldebusklane.com/master/content/post/Random_Code/sudoku.png "sudoku")
 
 
 The above puzzle can easily be objectified by addinging it into Python as a series of lists. 
@@ -198,4 +193,6 @@ solve()
 
 So, ultimately, this post has shown how to use recursion (cycling a function over and over again by calling itself) to work through a multiple outcome problem. Although interesting, use of this procedure may be limited to instances where there are multiple options, but only one or two final solutions. Interesting none-the-less. 
 
-As stated earlier, a similar solution is drafted in R [here](xxxx). Cheers!
+As stated earlier, a similar solution is drafted in R [here](xxxx) (which is coming soon!!. 
+
+Cheers!
