@@ -194,4 +194,6 @@ solve()
 
 So, ultimately, this post has shown how to use recursion (cycling a function over and over again by calling itself) to work through a multiple outcome problem. Although interesting, use of this procedure may be limited to instances where there are multiple options, but only one or two final solutions. Interesting none-the-less. 
 
-As stated earlier, a similar solution is drafted in R [here](xxxx). Cheers!
+As stated earlier, a similar solution is drafted in R [here](xxxx) (which is coming soon!!. 
+
+Cheers!
