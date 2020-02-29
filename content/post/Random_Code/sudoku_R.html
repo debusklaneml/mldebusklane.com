@@ -19,8 +19,8 @@ image:
 projects: []
 output: 
   html_document:
-    # theme: journal 
-    # highlight: zenburn
+    theme: journal
+    highlight: zenburn
 ---
 
 
@@ -39,9 +39,8 @@ output:
           0,6,0,0,0,0,2,8,0,
           0,0,0,4,1,9,0,0,5,
           0,0,0,0,8,0,0,7,9)</code></pre>
-<p>First, its important to push this into a matrix.</p>
+<p>First, it’s important to push this into a matrix.</p>
 <pre class="r"><code>board &lt;- matrix(board, nrow = 9, ncol = 9, byrow = TRUE) </code></pre>
-<p>Note: Different than the Python method, you’ll notice later on that I switch all zeros to NAs.</p>
 <p>Next, lets develop the code to render each cell’s possible answers:</p>
 <pre class="r"><code>possible &lt;- function(board, i, j){
   # Creates an all TRUE logical vector

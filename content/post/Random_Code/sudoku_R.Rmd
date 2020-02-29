@@ -19,8 +19,8 @@ image:
 projects: []
 output: 
   html_document:
-    # theme: journal 
-    # highlight: zenburn
+    theme: journal
+    highlight: zenburn
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
@@ -52,13 +52,11 @@ board <- c(5,3,0,0,7,0,0,0,0,
           0,0,0,0,8,0,0,7,9)
 ```
 
-First, its important to push this into a matrix. 
+First, it's important to push this into a matrix. 
 
 ```{r}
 board <- matrix(board, nrow = 9, ncol = 9, byrow = TRUE) 
 ```
-
-Note: Different than the Python method, you'll notice later on that I switch all zeros to NAs. 
 
 Next, lets develop the code to render each cell's possible answers: 
 

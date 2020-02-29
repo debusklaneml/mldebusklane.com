@@ -26,9 +26,10 @@ output:
 Interestingly I'm writing this blog post through JupyterLab, as opposed to strictly through R. Reason being, RStudio and the reticulate package have a bit of development left to go before knitr, rmarkdown, and RStudio work well together (you can reference this issue that I had a problem with [here](https://github.com/yihui/knitr/issues/1505). 
  
 Nevertheless, I'm still hosting this markdown document from JupyterLab to markdown and then through my own Academic Hugo webpage through RStudio... its a party really. 
-
  
 So, let's start. The point of this was to learn a bit more about how Python iterates and how something comparable can be handled in R. In doing so, there are some particulars that I'll touch on, but I would certainly say there is benefit of diving in yourself and writing it out. There is bound to be something you can learn by doing so. 
+
+I originally got interested in this and adapted (stole... or borrowed) most of this code from a youtube.com video from [Computerphile](https://youtu.be/G_UYXzGuqvM). 
  
 ![sudoku](https://raw.githubusercontent.com/debusklaneml/mldebusklane.com/master/content/post/Random_Code/sudoku.png "sudoku")
 
