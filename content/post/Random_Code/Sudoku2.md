@@ -22,8 +22,7 @@ output:
     theme: journal
     highlight: zenburn
 ---
-# Solving Sudoku Puzzles with Python
-    
+
 Interestingly I'm writing this blog post through JupyterLab, as opposed to strictly through R. Reason being, RStudio and the reticulate package have a bit of development left to go before knitr, rmarkdown, and RStudio work well together (you can reference this issue that I had a problem with [here](https://github.com/yihui/knitr/issues/1505). 
  
 Nevertheless, I'm still hosting this markdown document from JupyterLab to markdown and then through my own Academic Hugo webpage through RStudio... its a party really. 
