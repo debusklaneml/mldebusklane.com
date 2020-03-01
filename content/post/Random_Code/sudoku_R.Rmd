@@ -122,3 +122,4 @@ Although there is a lot going on here, I've attempted to put in some fairly desc
 solve(board)
 ```
 
+Arguably, I'm not a base R coder or programmer. Therefore, much of this post was generated from various websites, SOF, and other corners of the web--the R community is amazing. In a future post, I'll work to re-write this in some type of tidyverse rendition... if that is a thing. I'll at least try. 
