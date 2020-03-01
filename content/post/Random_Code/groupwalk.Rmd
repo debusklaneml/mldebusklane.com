@@ -35,7 +35,7 @@ library(tidyverse)
 library(writexl)
 ```
 
-Let's grab some data. 
+Let's grab some data!
 
 ```{r}
 data(iris)
