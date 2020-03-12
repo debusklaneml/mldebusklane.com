@@ -1,0 +1,152 @@
+---
+title: "TidyTuesday - NHL Greats - 2020 - Wk 10"
+author: admin
+date: '2020-03-11'
+slug:  
+categories: [Code]
+tags:
+  - R
+  - TidyTuesday
+subtitle: ''
+summary: 'Top Goals: 1980-2003'
+authors: [M. L. DeBusk-Lane]
+lastmod: '2020-01-04T07:57:09-05:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+output: 
+  html_document:
+    theme: journal
+    highlight: zenburn
+
+---
+
+
+
+<p>This week’s TidyTuesday post looks at a bunch of NHL data. Although I dont really follow the NHL, I do follow fellow TidyTuesday contributors and wanted to recreate one that caught my eye by <span class="citation">@jakekaupp</span>. I switched some things around and narrowed the obvious gap in his post to examine what was going on there.</p>
+<p>I’ve left the entire code as one chuck, as that is the way I went about it earlier in its own R script file.</p>
+<pre class="r"><code>library(tidyverse)
+library(janitor)
+library(readxl)
+library(tidylog)
+library(ggdark)
+library(ggforce)
+library(rvest)
+library(glue)
+library(patchwork)
+library(stringi)
+
+# Read in the data. 
+game_goals &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-03/game_goals.csv&#39;)
+top_250 &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-03/top_250.csv&#39;)
+season_goals &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-03/season_goals.csv&#39;)
+
+# Take a stab at recreating #jkaupp&#39;s work, but looking at what happend between about 1980 and 2003. 
+
+url &lt;- &quot;https://www.hockey-reference.com/leagues/stats.html&quot;
+
+total_scoring &lt;- read_html(url) %&gt;% 
+  html_node(&quot;#stats&quot;) %&gt;% 
+  html_table() %&gt;% 
+  filter(!str_detect(Rk, &quot;[A-Z]&quot;)) %&gt;% 
+  mutate_at(vars(GP:GAA), as.numeric) %&gt;% 
+  mutate(year = as.numeric(str_sub(Season, 1, 4)))
+
+ppm_data &lt;- season_goals %&gt;% 
+  group_by(player, season) %&gt;% 
+  summarize(goals = sum(goals, na.rm = TRUE),
+            assists = sum(assists, na.rm = TRUE)) %&gt;% 
+  group_by(season) %&gt;% 
+  mutate(min_goals = min(goals, na.rm = TRUE),
+         max_goals = max(goals, na.rm = TRUE)) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(year = as.numeric(str_sub(season, 1, 4))) %&gt;% 
+  arrange(year) %&gt;% 
+  filter(between(year, 1980, 2003))
+
+top_2 &lt;- ppm_data %&gt;% 
+  filter(goals == max_goals) %&gt;% 
+  count(player) %&gt;% 
+  ungroup() %&gt;% 
+  top_n(2, n) %&gt;% 
+  arrange(desc(n)) %&gt;% 
+  mutate(color = case_when(str_detect(player, &quot;Gretzky&quot;) ~ &quot;#fc4903&quot;,
+                           str_detect(player, &quot;Mike Gartner&quot;) ~ &quot;#FFB81C&quot;,
+                           TRUE ~ NA_character_),
+         alpha = 1,
+         size = 1)
+
+bkg_rect &lt;- ppm_data %&gt;% 
+  distinct(year, season, min_goals, max_goals) %&gt;% 
+  left_join(total_scoring)
+
+plot_data &lt;- ppm_data %&gt;% 
+  left_join(top_2) %&gt;% 
+  replace_na(list(color = &quot;#363636&quot;,
+                  alpha = 0.2,
+                  size = 0.5))
+
+annotations &lt;- ppm_data %&gt;% 
+  filter(goals == max_goals) %&gt;% 
+  semi_join(top_2) %&gt;% 
+  group_by(player) %&gt;% 
+  filter(goals == max(max_goals)) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(xend = c(1952, 1970),     # Not sure what these are for?
+         yend = c(70, 90)) %&gt;% 
+  mutate(color = case_when(str_detect(player, &quot;Gretzky&quot;) ~ &quot;#fc4903&quot;,
+                           str_detect(player, &quot;Mike Gartner&quot;) ~ &quot;#FFB81C&quot;,
+                           TRUE ~ NA_character_))
+
+avg_scoring &lt;- ggplot(bkg_rect, aes(x = year)) +
+  geom_tile(aes(y = 0, fill = G, height = 1, width = .9),  color = &quot;white&quot;) +
+  labs(x = NULL,
+       y = NULL) +
+  coord_equal() +
+  scale_x_continuous(limits = c(1980, 2003), expand = c(0,0), breaks = seq(1985, 2004, 5), position = &quot;top&quot;) +
+  scale_fill_gradient(&quot;Average Goals per game, for comparative puporses and\nto account for the pace of the game in different eras.&quot;,  low = &quot;#e5e5e5&quot;, high = &quot;#DC143C&quot;) +
+  #theme_jk(grid = FALSE) +
+  theme(axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        plot.margin = margin(0, 0, 0, 0),
+        plot.background = element_rect(fill = &quot;white&quot;, colour = &#39;white&#39;),
+        panel.background = element_rect(fill = &#39;white&#39;),
+        panel.grid.major = element_line(colour = &quot;white&quot;),
+        legend.position = &quot;bottom&quot;, #c(0.5, 0),
+        legend.direction = &quot;horizontal&quot;,
+        legend.key.height = unit(2.5, &quot;mm&quot;)) 
+
+goal_leaders &lt;- ggplot(bkg_rect, aes(x = year)) +
+  geom_rect(aes(xmin = year - 0.3, xmax = year + 0.3, ymin = min_goals, ymax = max_goals), fill = &quot;#e5e5e5&quot;, color = &quot;#e5e5e5&quot;) +
+  #geom_rect(aes(xmin = 2004 - 0.3, xmax = 2004 + 0.3, ymin = 0, ymax = 60), fill = &quot;#FFFFFF&quot;, color = &quot;#363636&quot;, size = 0.5) +
+  geom_segment(data = plot_data, aes(x = year - 0.3, xend = year + 0.3, y = goals, yend = goals, color = color, alpha = alpha, size = size)) +
+  geom_mark_circle(data = annotations, aes(y = goals, group = player, filter = str_detect(player, &quot;Gretzky&quot;), label = glue(&quot;{year} Goal Leader&quot;), description = glue(&quot;{player}: {goals} goals&quot;)), label.family = &quot;American Typewriter Light&quot;, expand = unit(7, &quot;mm&quot;), label.colour = c(&quot;black&quot;, &quot;#fc4903&quot;), label.fontface = c(&quot;plain&quot;, &quot;bold&quot;)) +
+  geom_mark_circle(data = annotations, aes(y = goals, group = player, filter = str_detect(player, &quot;Gartner&quot;), label = glue(&quot;{year} Goal Leader&quot;), description = glue(&quot;{player}: {goals} goals&quot;)), label.family = &quot;American Typewriter Light&quot;, expand = unit(7, &quot;mm&quot;), label.colour = c(&quot;black&quot;, &quot;#FFB81C&quot;), label.fontface = c(&quot;plain&quot;, &quot;bold&quot;)) + 
+  scale_x_continuous(limits = c(1980, 2003), expand = c(0,0), breaks = seq(1985, 2003, 5)) +
+  scale_y_continuous(limits = c(0, 120), breaks = seq(0, 120, 20)) +
+  labs(x = NULL, 
+       y = NULL) +
+  scale_color_identity() +
+  scale_size_identity() +
+  scale_alpha_identity() +
+  theme_bw() +
+  #theme_jk(grid = &quot;Y&quot;, markdown = TRUE) +
+  theme(plot.margin = margin(0, 0, 0, 0),
+        axis.text.y = element_blank(),
+        plot.background = element_rect(fill = &quot;#fbfcfc&quot;, colour = NA),
+        plot.title = element_text(family = &quot;American Typewriter Light&quot;))
+
+stringx &lt;- &quot;Both Gretzky and Gartner have recorded the highest scoring seasong between 1980 and 2003. Each line in the bar represents the goals scored by one of the top 250 goal scorers in the NHL.&quot;
+subtitle &lt;- (str_wrap(stringx, width = 130))
+
+
+out &lt;- wrap_plots(avg_scoring, goal_leaders, ncol = 1, heights = c(0.05, 0.95), widths = c(1, 1)) +
+  plot_annotation(title = &quot;The Three Way Tie for the Record of Most Seasons Leading Goal-Scoring in the NHL&quot;,
+                  subtitle = subtitle,
+                  caption = &quot;**Data**: hockey-reference.com | **Graphic**: @mldebusklane | *Idea*: @jakekaupp&quot;) &amp;
+  theme(text = element_text(family = &quot;American Typewriter Light&quot;, face = &quot;bold&quot;))</code></pre>
+<pre class="r"><code>out</code></pre>
+<p><img src="/post/TidyTuesday/tt_2020_w10_nhl_files/figure-html/unnamed-chunk-2-1.png" width="3000" /></p>
