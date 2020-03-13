@@ -101,7 +101,7 @@ annotations <- ppm_data %>%
   group_by(player) %>% 
   filter(goals == max(max_goals)) %>% 
   ungroup() %>% 
-  mutate(xend = c(1952, 1970),     # Not sure what these are for?
+  mutate(xend = c(1952, 1970),     
          yend = c(70, 90)) %>% 
   mutate(color = case_when(str_detect(player, "Gretzky") ~ "#fc4903",
                            str_detect(player, "Mike Gartner") ~ "#FFB81C",
@@ -114,7 +114,7 @@ avg_scoring <- ggplot(bkg_rect, aes(x = year)) +
   coord_equal() +
   scale_x_continuous(limits = c(1980, 2003), expand = c(0,0), breaks = seq(1985, 2004, 5), position = "top") +
   scale_fill_gradient("Average Goals per game, for comparative puporses and\nto account for the pace of the game in different eras.",  low = "#e5e5e5", high = "#DC143C") +
-  #theme_jk(grid = FALSE) +
+
   theme(axis.text.y = element_blank(),
         axis.ticks = element_blank(),
         plot.margin = margin(0, 0, 0, 0),
@@ -139,7 +139,6 @@ goal_leaders <- ggplot(bkg_rect, aes(x = year)) +
   scale_size_identity() +
   scale_alpha_identity() +
   theme_bw() +
-  #theme_jk(grid = "Y", markdown = TRUE) +
   theme(plot.margin = margin(0, 0, 0, 0),
         axis.text.y = element_blank(),
         plot.background = element_rect(fill = "#fbfcfc", colour = NA),

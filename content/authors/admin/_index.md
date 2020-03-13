@@ -10,7 +10,7 @@ authors:
 superuser: true
 
 # Role/position
-role: Educational Data Scientist 
+role: Data Scientist 
 
 # Organizations/Affiliations
 organizations:
