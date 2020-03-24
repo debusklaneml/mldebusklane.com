@@ -15,7 +15,7 @@ links:
 - icon: github
   icon_pack: fab
   name: Link to GitHub
-  url: https://github.com/debusklaneml/random_R_functions/blob/master/random_R_functions.R
+  url: https://github.com/debusklaneml/personal.package
 
 categories:
 - Code
