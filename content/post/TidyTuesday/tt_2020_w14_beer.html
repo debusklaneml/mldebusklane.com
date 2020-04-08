@@ -1,0 +1,83 @@
+---
+title: "TidyTuesday - Beer Production - 2020 - Wk 10"
+author: admin
+date: '2020-04-07'
+slug:  
+categories: [Code]
+tags:
+  - R
+  - TidyTuesday
+subtitle: ''  
+summary: 'A look at beer production'
+authors: [M. L. DeBusk-Lane]
+lastmod: '2020-04-07T07:57:09-05:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+output: 
+  html_document:
+    theme: journal
+    highlight: zenburn
+
+---
+
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+
+
+<p>This week’s effort will dive into beer production across America. You may find more informaiton at <a href="https://www.ttb.gov/beer/statistics">Alcohol and Tobacco Tax and Trade Bureau (TTB)</a>.</p>
+<pre class="r"><code>library(tidyverse)
+library(janitor)
+library(readxl)
+library(tidylog)
+library(ggdark)
+library(ggforce)
+library(rvest)
+library(glue)
+library(patchwork)
+library(stringi)
+library(lubridate)
+
+# Read in the data. 
+brewing_materials &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-31/brewing_materials.csv&#39;)
+beer_taxed &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-31/beer_taxed.csv&#39;)
+brewer_size &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-31/brewer_size.csv&#39;)
+beer_states &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-31/beer_states.csv&#39;)</code></pre>
+<pre class="r"><code>hops &lt;- brewing_materials %&gt;%
+  filter(between(year, 2008, 2015)) %&gt;%
+  mutate(date = make_date(year, month)) %&gt;%
+  group_by(date, type) %&gt;%
+  summarize(avg = mean(month_current)) %&gt;%
+  filter(!type %in% c(&#39;Total Grain products&#39;, &#39;Other&#39;, &#39;Total Non-Grain products&#39;, &#39;Total Used&#39;)) </code></pre>
+<p>I like IPAs, so lets see if we can see the obvious rise in the market through what materials are used to make it.</p>
+<p>According to</p>
+<pre class="r"><code>time_series &lt;- hops %&gt;%
+  ggplot(aes(x = date, y = avg, group = type)) + 
+  geom_line(aes(color = type)) + 
+  theme(axis.text.x = element_text(angle = 90))
+time_series</code></pre>
+<p><img src="/post/TidyTuesday/tt_2020_w14_beer_files/figure-html/unnamed-chunk-3-1.png" width="2400" /></p>
+<p>I wanted to becone a bit more familiar with plotly… primarily because I wanted to use it to eventually make some flexdashboard stuff.</p>
+<pre class="r"><code>library(plotly) 
+# Need to widen the data. 
+hops.w = hops %&gt;% ungroup() %&gt;% 
+  pivot_wider(names_from = type, values_from = avg) %&gt;% clean_names()
+fig &lt;- plot_ly(hops.w, x = ~date, y = ~hops_dry, name = &#39;dry hops&#39;, type = &#39;scatter&#39;, mode = &#39;lines&#39;,
+               line = list(color = &#39;red&#39;, width = 2))
+fig &lt;- fig %&gt;% add_trace(y = ~sugar_and_syrups, name = &#39;Barley Products&#39;, type = &#39;scatter&#39;,mode = &#39;lines+markers&#39;,
+                         line = list(color = &#39;blue&#39;, width = 2))
+fig &lt;- fig %&gt;% layout(title = &quot;Materials Use Over Time&quot;,
+         xaxis = list(title = &quot;Date&quot;),
+         yaxis = list (title = &quot;Usage&quot;))
+fig</code></pre>
+<div id="htmlwidget-1" style="width:2400px;height:2100px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"visdat":{"bf5441acb628":["function () ","plotlyVisDat"]},"cur_data":"bf5441acb628","attrs":{"bf5441acb628":{"x":{},"y":{},"mode":"lines","line":{"color":"red","width":2},"name":"dry hops","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"},"bf5441acb628.1":{"x":{},"y":{},"mode":"lines+markers","line":{"color":"blue","width":2},"name":"Barley Products","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter","inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Materials Use Over Time","xaxis":{"domain":[0,1],"automargin":true,"title":"Date"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Usage"},"hovermode":"closest","showlegend":true},"source":"A","config":{"showSendToCloud":false},"data":[{"x":["2008-01-01","2008-02-01","2008-03-01","2008-04-01","2008-05-01","2008-06-01","2008-07-01","2008-08-01","2008-09-01","2008-10-01","2008-11-01","2008-12-01","2009-01-01","2009-02-01","2009-03-01","2009-04-01","2009-05-01","2009-06-01","2009-07-01","2009-08-01","2009-09-01","2009-10-01","2009-11-01","2009-12-01","2010-01-01","2010-02-01","2010-03-01","2010-04-01","2010-05-01","2010-06-01","2010-07-01","2010-08-01","2010-09-01","2010-10-01","2010-11-01","2010-12-01","2011-01-01","2011-02-01","2011-03-01","2011-04-01","2011-05-01","2011-06-01","2011-07-01","2011-08-01","2011-09-01","2011-10-01","2011-11-01","2011-12-01","2012-01-01","2012-02-01","2012-03-01","2012-04-01","2012-05-01","2012-06-01","2012-07-01","2012-08-01","2012-09-01","2012-10-01","2012-11-01","2012-12-01","2013-01-01","2013-02-01","2013-03-01","2013-04-01","2013-05-01","2013-06-01","2013-07-01","2013-08-01","2013-09-01","2013-10-01","2013-11-01","2013-12-01","2014-01-01","2014-02-01","2014-03-01","2014-04-01","2014-05-01","2014-06-01","2014-07-01","2014-08-01","2014-09-01","2014-10-01","2014-11-01","2014-12-01","2015-01-01","2015-02-01","2015-03-01","2015-04-01","2015-05-01","2015-06-01","2015-07-01","2015-08-01","2015-09-01","2015-10-01","2015-11-01","2015-12-01"],"y":[4506546,1815271,6067167,6864440,7470130,7361941,1759452,5992025,3788942,3788949,3897905,1576751,1461121,4601598,6787391,5574889,7051829,6854083,7309199,5393471,5216389,1326445,4442654,3887961,4765924,4899463,7932387,8240399,9080801,10418215,8297261,7272871,6437916,9244763,7727370,6540100,6059066,7617974,10736471,9942341,10076039,10603566,9514024,7575266,7462299,7238838,8455615,11606511,9562820,1366949,10288665,11641934,12583340,12720422,12188084,10374025,10180667,9505007,10621547,7808600,9164708,9456485,9754327,9791137,10286943,12319034,11044977,1670049,2339398,1681113,1440544,2129685,1890937,1733845,3719722,2167689,2173226,2894437,2423064,1835895,4289504,1899541,1492949,284055954,1899000,1754927,3743541,2184404,2188410,2991932,2352314,1807220,4335014,1826524,1360528,284114545],"mode":"lines","line":{"color":"red","width":2},"name":"dry hops","type":"scatter","marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2008-01-01","2008-02-01","2008-03-01","2008-04-01","2008-05-01","2008-06-01","2008-07-01","2008-08-01","2008-09-01","2008-10-01","2008-11-01","2008-12-01","2009-01-01","2009-02-01","2009-03-01","2009-04-01","2009-05-01","2009-06-01","2009-07-01","2009-08-01","2009-09-01","2009-10-01","2009-11-01","2009-12-01","2010-01-01","2010-02-01","2010-03-01","2010-04-01","2010-05-01","2010-06-01","2010-07-01","2010-08-01","2010-09-01","2010-10-01","2010-11-01","2010-12-01","2011-01-01","2011-02-01","2011-03-01","2011-04-01","2011-05-01","2011-06-01","2011-07-01","2011-08-01","2011-09-01","2011-10-01","2011-11-01","2011-12-01","2012-01-01","2012-02-01","2012-03-01","2012-04-01","2012-05-01","2012-06-01","2012-07-01","2012-08-01","2012-09-01","2012-10-01","2012-11-01","2012-12-01","2013-01-01","2013-02-01","2013-03-01","2013-04-01","2013-05-01","2013-06-01","2013-07-01","2013-08-01","2013-09-01","2013-10-01","2013-11-01","2013-12-01","2014-01-01","2014-02-01","2014-03-01","2014-04-01","2014-05-01","2014-06-01","2014-07-01","2014-08-01","2014-09-01","2014-10-01","2014-11-01","2014-12-01","2015-01-01","2015-02-01","2015-03-01","2015-04-01","2015-05-01","2015-06-01","2015-07-01","2015-08-01","2015-09-01","2015-10-01","2015-11-01","2015-12-01"],"y":[78358212,80188744,78907213,81199989,89946309,81012422,76728131,83928121,71982604,42828943,44000736,38952441,67834569,69375203,70030415,71341108,75011893,69563483,64776817,61354833,50025197,47840939,44926666,39077880,47308358,46718854,61007512,73040421,76115769,67266337,76584550,75815015,69053125,67265699,59184495,49709103,73793509,63374850,74925793,68297327,66314234,67178952,62190400,60003874,61317581,65478836,55627592,52413557,62988309,65344809,79859286,82481856,87785168,89443470,92543919,77156577,65251144,70185532,64916501,59586860,72878590,71244280,85703037,92273777,96158421,87459068,89540845,79896297,62065299,66002563,58514321,61764460,72039259,74414600,86871712,83132566,81403402,78715950,79758226,84424807,71386473,77825404,61665023,11292897,71798065,74138605,82468474,82896506,81171257,78547713,74805384,80080228,71270147,77650579,61470208,11332454],"mode":"lines+markers","line":{"color":"blue","width":2},"name":"Barley Products","type":"scatter","marker":{"color":"rgba(255,127,14,1)","line":{"color":"rgba(255,127,14,1)"}},"error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>

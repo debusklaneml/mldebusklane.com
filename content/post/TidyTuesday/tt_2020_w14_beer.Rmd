@@ -52,9 +52,10 @@ beer_states <- readr::read_csv('https://raw.githubusercontent.com/rfordatascienc
 
 ```
 
+Let's begin with a bit of data prep. 
 
 ```{r}
-hops <- brewing_materials %>%
+hops1 <- brewing_materials %>%
   filter(between(year, 2008, 2015)) %>%
   mutate(date = make_date(year, month)) %>%
   group_by(date, type) %>%
@@ -62,16 +63,23 @@ hops <- brewing_materials %>%
   filter(!type %in% c('Total Grain products', 'Other', 'Total Non-Grain products', 'Total Used')) 
 ```
 
+```{r}
+time_series1 <- hops1 %>%
+  ggplot(aes(x = date, y = avg, group = type)) + 
+  geom_line(aes(color = type)) + 
+  theme(axis.text.x = element_text(angle = 90))
+time_series1
+```
 
 I like IPAs, so lets see if we can see the obvious rise in the market through what materials are used to make it. 
 
 According to 
 ```{r}
-time_series <- hops %>%
+time_series2 <- hops %>%
   ggplot(aes(x = date, y = avg, group = type)) + 
   geom_line(aes(color = type)) + 
   theme(axis.text.x = element_text(angle = 90))
-time_series
+time_series2
 ```
 
 I wanted to becone a bit more familiar with plotly... primarily because I wanted to use it to eventually make some flexdashboard stuff. 
