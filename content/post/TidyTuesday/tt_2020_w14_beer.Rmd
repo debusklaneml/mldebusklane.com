@@ -1,14 +1,14 @@
 ---
 title: "TidyTuesday - Beer Production - 2020 - Wk 10"
 author: admin
-date: '2020-03-11'
+date: '2020-04-07'
 slug:  
 categories: [Code]
 tags:
   - R
   - TidyTuesday
 subtitle: ''  
-summary: 'Top Goals: 1980-2003'
+summary: 'A look at beer production'
 authors: [M. L. DeBusk-Lane]
 lastmod: '2020-01-04T07:57:09-05:00'
 featured: no
