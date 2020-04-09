@@ -52,11 +52,10 @@ beer_states <- readr::read_csv('https://raw.githubusercontent.com/rfordatascienc
 
 ```
 
-Let's begin with a bit of data prep. 
+Let's begin with a bit of data prep. I'm most interested in how this looks longitudinally, so I used `make_date` to bring together the year and month into a date variable--primarily for proper sorting. 
 
 ```{r}
 hops1 <- brewing_materials %>%
-  filter(between(year, 2008, 2015)) %>%
   mutate(date = make_date(year, month)) %>%
   group_by(date, type) %>%
   summarize(avg = mean(month_current)) %>%
@@ -71,36 +70,158 @@ time_series1 <- hops1 %>%
 time_series1
 ```
 
-I like IPAs, so lets see if we can see the obvious rise in the market through what materials are used to make it. 
+Clearly something does not look right after 2016. From what I can find, it appears they changed the reporting criteria or structure. Although I was looking for some type of diverging trend to indicate a change in types of beer popularity (my hypothesis), I'm not sure that is evident. The `Hops (dry)` variable obvious does something crazy in 2015-2016, but I'm not sure I trust that much of an increase beween 2014 and 2015. 
 
-According to 
+Nevertheless, lets keep going with an effort towards modeling this time series between 2008 and the end of 2014 (somewhat cleanish/valid data). Also, just to zoom in a bit, I'd like to examine the seasonality of `Malt and malt products`. 
+
 ```{r}
-time_series2 <- hops %>%
+library(zoo)
+library(lubridate)
+hops2 <- brewing_materials %>%
+  mutate(date = make_date(year, month)) %>%
+  #unite("testdate", year:month, sep = "-") %>%
+  #mutate(date = zoo::as.yearmon(testdate, "%Y-%m")) %>%
+  filter(date >= '2008-01-01' & date <= '2014-01-01') %>%
+   #  %>%
+ # mutate(date1 = as_date(as.yearmon(date, "%Y-%b")))
+  group_by(date, type) %>%  
+  summarize(avg = mean(month_current)) %>% ungroup() %>%
+  filter(type == 'Malt and malt products') %>%
+  mutate(date = ymd(date, truncated = 1))
+  #mutate(date2 = as.Date(date))
+```
+
+```{r}
+time_series2 <- hops2 %>%
   ggplot(aes(x = date, y = avg, group = type)) + 
   geom_line(aes(color = type)) + 
   theme(axis.text.x = element_text(angle = 90))
 time_series2
 ```
 
-I wanted to becone a bit more familiar with plotly... primarily because I wanted to use it to eventually make some flexdashboard stuff. 
+```{r}
+class(hops2)
+```
+
+To model this, I'd like to push this time series into a `tsibble` to classify it as temporal data. 
 
 ```{r}
-library(plotly) 
-# Need to widen the data. 
-hops.w = hops %>% ungroup() %>% 
-  pivot_wider(names_from = type, values_from = avg) %>% clean_names()
-fig <- plot_ly(hops.w, x = ~date, y = ~hops_dry, name = 'dry hops', type = 'scatter', mode = 'lines',
-               line = list(color = 'red', width = 2))
-fig <- fig %>% add_trace(y = ~sugar_and_syrups, name = 'Barley Products', type = 'scatter',mode = 'lines+markers',
-                         line = list(color = 'blue', width = 2))
-fig <- fig %>% layout(title = "Materials Use Over Time",
-         xaxis = list(title = "Date"),
-         yaxis = list (title = "Usage"))
-fig
+library(tsibble)
+ts <- as_tsibble(hops2, index = date, key = type)
+```
+
+```{r}
+class(ts)
+```
+
+Visualize using the TSstudio package from `Rami Krispin`
+```{r}
+library(TSstudio)
+ts_plot(ts,
+        title = "Malts Over Time",
+        Ytitle = "Millions of Barrels")
+```
+
+```{r}
+seasonal <- ts(data = ts$avg, start = c(2008, 1), end = c(2014, 1), frequency = 12)
+              
+ts_seasonal(seasonal)
+```
+
+From this, it appears there is a strong yearly sesonality. However, there does appear to be a noticable decline across the entire year as time moves. This trend is also evident in the plot above this one, whereby there appears to be a fairly linear decline over time. 
+
+I'll use a developmental R package `forecastLM` to examine this trend. You can find more details [here](https://github.com/RamiKrispin/forecastLM). 
+
+```{r}
+
+
+# Stopped here. I'm using the ts series, which implies monthly data. Look into this. 
+
+
+library(forecastLM)
+lm1 <- trainLM(input = ts,
+               y = "avg",
+               trend = list(linear = TRUE),
+               seasonal = "month")
+```
+
+```{r}
+summary(lm1$model)
+```
+
+```{r}
+lm1.1 <- trainLM(input = seasonal,
+               y = "avg",
+               trend = list(linear = TRUE),
+               seasonal = "month")
+```
+
+```{r}
+summary(lm1.1$model)
 ```
 
 
-```{r, fig.height= 10, fig.width= 10}
+```{r}
+plot_res(lm1.1)
+```
+
+It appears there is a bit of residual correlations, so lets see if we can improve the model by accounting for the lag. 
+
+```{r}
+lm2  <- trainLM(input = ts,
+               y = "avg",
+               trend = list(linear = TRUE),
+               seasonal = "month", 
+               lags = c(1))
+```
+
+```{r}
+
+```
+
+
+```{r}
+summary(lm2$model)
+```
+
+```{r}
+plot_res(lm2)
+```
+
+```{r}
+events <- list(outlier = c(as_date("2009-01-01"), as_date("2009-09-01"), as_date("2010-05-01"), as_date("2010-12-01"), as_date("2014-12-01"), as_date("2011-09-01")))
+lm3  <- trainLM(input = seasonal,
+               y = "avg",
+               trend = list(log = TRUE),
+               seasonal = "month", 
+               lags = c(1),
+               step = TRUE,
+               events = events)
+               #scale = "log")
+```
+
+```{r}
+summary(lm3$model)
+```
+
+```{r}
+plot_res(lm3)
+```
+
+Now that we have a prediction model that accounts for roughly 87% of the variability, we can look and see what this may have looked like with somewhat clean data or consistent reporting. 
+
+```{r} 
+# Using the lm3 prediction model. 
+fc3 <- forecastLM(lm3, h = 12)
+```
+
+```{r}
+# Plot it.
+plot_fc(fc3)
+```
+
+```{r}
+library(forecast)
 
 ```
 
