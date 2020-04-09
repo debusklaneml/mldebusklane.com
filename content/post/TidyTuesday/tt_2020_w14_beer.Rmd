@@ -75,8 +75,6 @@ Clearly something does not look right after 2016. From what I can find, it appea
 Nevertheless, lets keep going with an effort towards modeling this time series between 2008 and the end of 2014 (somewhat cleanish/valid data). Also, just to zoom in a bit, I'd like to examine the seasonality of `Malt and malt products`. 
 
 ```{r}
-library(zoo)
-library(lubridate)
 hops2 <- brewing_materials %>%
   mutate(date = make_date(year, month)) %>%
   #unite("testdate", year:month, sep = "-") %>%
@@ -107,39 +105,66 @@ To model this, I'd like to push this time series into a `tsibble` to classify it
 
 ```{r}
 library(tsibble)
-ts <- as_tsibble(hops2, index = date, key = type)
+tsibble <- as_tsibble(hops2, index = date, key = type)
 ```
 
+
 ```{r}
-class(ts)
+class(tsibble$date)
 ```
 
-Visualize using the TSstudio package from `Rami Krispin`
+I fought with this for a good while. Lesson learned. Although this variable `ts$date` identifies as a 'Date' variable, it is not in the right or correct interval. 
+
+Lets take a look. Notice the structure of the `date` variable below, it is in `%Y-%m-%d'. 
+
+In the end, this forecasts daily, not monthly. We must coerce this variable's interval as a month. 
+
 ```{r}
-library(TSstudio)
-ts_plot(ts,
+head(tsibble)
+```
+
+In this instance, I knew I wanted to use the `forecastLM` developmental package which  takes a tsibble or ts object. However, it does not have internal checks to determine your data align with the interval for which you've situated. 
+
+In my case, I did not originally situate an interval for the tsibble object I created and ran into problems during forecasting. 
+
+How to set a `year month` interval in tsibble using the `yearmonth` function:
+
+```{r}
+tsibble <- tsibble %>%
+  mutate(date = yearmonth(date))
+```
+```{r}
+class(tsibble$date)
+```
+
+This allows forecastLM to make predictions on a monthly basis, not daily... 
+
+```{r}
+class(tsibble)
+```
+
+Visualize using the TSstudio package from `Rami Krispin`, which takes a ts object as input for graphics. So lets make a ts object, as opposed to the tsibble. 
+```{r , out.width='100%', out.height='100%'}
+library(TSstudio) 
+seasonal <- ts(data = tsibble$avg, start = c(2008, 1), end = c(2014, 1), frequency = 12)
+ts_plot(seasonal,
         title = "Malts Over Time",
         Ytitle = "Millions of Barrels")
 ```
 
-```{r}
-seasonal <- ts(data = ts$avg, start = c(2008, 1), end = c(2014, 1), frequency = 12)
-              
-ts_seasonal(seasonal)
+```{r , out.width='100%', out.height='100%'}
+ts_seasonal(seasonal, type = "all")
 ```
 
-From this, it appears there is a strong yearly sesonality. However, there does appear to be a noticable decline across the entire year as time moves. This trend is also evident in the plot above this one, whereby there appears to be a fairly linear decline over time. 
+
+
+From this, it appears there is a strong montly sesonality--with a bit of variability. However, there does appear to be a noticable decline across the entire year as time moves. This trend is also evident in the plot above this one, whereby there appears to be a fairly linear decline over time. 
 
 I'll use a developmental R package `forecastLM` to examine this trend. You can find more details [here](https://github.com/RamiKrispin/forecastLM). 
 
 ```{r}
-
-
-# Stopped here. I'm using the ts series, which implies monthly data. Look into this. 
-
-
 library(forecastLM)
-lm1 <- trainLM(input = ts,
+lm1 <- trainLM(input = tsibble,
                y = "avg",
                trend = list(linear = TRUE),
                seasonal = "month")
@@ -161,14 +186,14 @@ summary(lm1.1$model)
 ```
 
 
-```{r}
+```{r , out.width='100%', out.height='100%'}
 plot_res(lm1.1)
 ```
 
 It appears there is a bit of residual correlations, so lets see if we can improve the model by accounting for the lag. 
 
 ```{r}
-lm2  <- trainLM(input = ts,
+lm2  <- trainLM(input = tsibble,
                y = "avg",
                trend = list(linear = TRUE),
                seasonal = "month", 
@@ -184,7 +209,7 @@ lm2  <- trainLM(input = ts,
 summary(lm2$model)
 ```
 
-```{r}
+```{r , out.width='100%', out.height='100%'}
 plot_res(lm2)
 ```
 
@@ -204,7 +229,7 @@ lm3  <- trainLM(input = seasonal,
 summary(lm3$model)
 ```
 
-```{r}
+```{r , out.width='100%', out.height='100%'}
 plot_res(lm3)
 ```
 
@@ -212,12 +237,12 @@ Now that we have a prediction model that accounts for roughly 87% of the variabi
 
 ```{r} 
 # Using the lm3 prediction model. 
-fc3 <- forecastLM(lm3, h = 12)
+fc3 <- forecastLM(lm3, h = 24)
 ```
 
-```{r}
+```{r , out.width='100%', out.height='100%'}
 # Plot it.
-plot_fc(fc3)
+plot_fc(fc3, theme = 'darkBlue')
 ```
 
 ```{r}
