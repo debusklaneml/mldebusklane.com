@@ -70,24 +70,21 @@ time_series1 <- hops1 %>%
 time_series1
 ```
 
-Clearly something does not look right after 2016. From what I can find, it appears they changed the reporting criteria or structure. Although I was looking for some type of diverging trend to indicate a change in types of beer popularity (my hypothesis), I'm not sure that is evident. The `Hops (dry)` variable obvious does something crazy in 2015-2016, but I'm not sure I trust that much of an increase beween 2014 and 2015. 
+Clearly something does not look right after 2016. From what I can find, it appears they changed the reporting criteria or structure. Although I was looking for some type of diverging trend to indicate a change in types of beer popularity (my hypothesis), I'm not sure that is evident. The `Hops (dry)` variable obviously does something crazy in 2015-2016, but I'm not sure I trust that much of an increase beween 2014 and 2015 either. 
 
-Nevertheless, lets keep going with an effort towards modeling this time series between 2008 and the end of 2014 (somewhat cleanish/valid data). Also, just to zoom in a bit, I'd like to examine the seasonality of `Malt and malt products`. 
+Nevertheless, lets keep going with an effort now towards modeling this time series between 2008 and the end of 2014 (somewhat cleanish/valid data). Just to zoom in a bit, I'd like to examine the seasonality of `Malt and malt products`. 
 
 ```{r}
 hops2 <- brewing_materials %>%
   mutate(date = make_date(year, month)) %>%
-  #unite("testdate", year:month, sep = "-") %>%
-  #mutate(date = zoo::as.yearmon(testdate, "%Y-%m")) %>%
   filter(date >= '2008-01-01' & date <= '2014-01-01') %>%
-   #  %>%
- # mutate(date1 = as_date(as.yearmon(date, "%Y-%b")))
   group_by(date, type) %>%  
   summarize(avg = mean(month_current)) %>% ungroup() %>%
   filter(type == 'Malt and malt products') %>%
   mutate(date = ymd(date, truncated = 1))
-  #mutate(date2 = as.Date(date))
 ```
+
+Let's take a look with just this vantage. 
 
 ```{r}
 time_series2 <- hops2 %>%
@@ -148,9 +145,16 @@ Visualize using the TSstudio package from `Rami Krispin`, which takes a ts objec
 library(TSstudio) 
 seasonal <- ts(data = tsibble$avg, start = c(2008, 1), end = c(2014, 1), frequency = 12)
 ts_plot(seasonal,
+        line.mode = "lines+markers",
+        Ygrid = T, slider = T,
         title = "Malts Over Time",
         Ytitle = "Millions of Barrels")
 ```
+
+```{r}
+ts_cor(seasonal, seasonal_lags = 12, lag.max = 60)
+```
+
 
 ```{r , out.width='100%', out.height='100%'}
 ts_seasonal(seasonal, type = "all")
