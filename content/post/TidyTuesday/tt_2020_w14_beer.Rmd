@@ -25,8 +25,7 @@ output:
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
-                      echo = TRUE,  cache.lazy = FALSE,
-                      fig.width = 8, fig.height = 7)
+                      echo = TRUE,  cache.lazy = FALSE)
 ```
 
 This week's effort will dive into beer production across America. You may find more informaiton at [Alcohol and Tobacco Tax and Trade Bureau (TTB)](https://www.ttb.gov/beer/statistics). 
@@ -149,10 +148,10 @@ ts_plot(seasonal,
 
 To better understand the seaonality, we can examine the autocorrelation and the partial autocorrelation functions from their correlograms (such a great name!). 
 ```{r , out.width='100%', out.height='100%'}
-ts_cor(seasonal, seasonal_lags = 12, lag.max = 60)
+ts_cor(seasonal, lag.max = 36)
 ```
 
-In this case (considering approximate stationarity--I've venturing to difference in this post), it is evident that this is an autocorrelated series with clear declining trend--as presented by the ACF plot's clear decline over time. In this case, there seems to be a clear higher-order autoregressive term in the data. 
+In this case (considering approximate stationarity--I will not be venturing into differencing in this post), it is evident that this is an autocorrelated series with clear declining trend--as presented by the ACF plot's clear decline over time. In this case, there seems to be a clear higher-order autoregressive term in the data. 
 
 To examine this term we can use the PACF plot, which looks at the residuals of the ACF (essentially), which suggests that most of the autocorrelation across seasons is simply because of the strong lag-1 autocorrelation. We will keep this in the model. 
  
