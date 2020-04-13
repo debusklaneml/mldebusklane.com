@@ -25,24 +25,19 @@ output:
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
-                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
+                      echo = TRUE,  cache.lazy = FALSE,
                       fig.width = 8, fig.height = 7)
 ```
 
 This week's effort will dive into beer production across America. You may find more informaiton at [Alcohol and Tobacco Tax and Trade Bureau (TTB)](https://www.ttb.gov/beer/statistics). 
 
+This EDA and time series analysis is not for quality, validity, or in line with typical time series analysis practice. I'm simply messing around with both the `TSstudio` and `forecastLM` packages... just to give them some love. 
+
 ```{r}
 library(tidyverse)
 library(janitor)
-library(readxl)
-library(tidylog)
-library(ggdark)
-library(ggforce)
-library(rvest)
-library(glue)
-library(patchwork)
-library(stringi)
 library(lubridate)
+library(plotly)
 
 # Read in the data. 
 brewing_materials <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-31/brewing_materials.csv')
@@ -72,12 +67,12 @@ time_series1
 
 Clearly something does not look right after 2016. From what I can find, it appears they changed the reporting criteria or structure. Although I was looking for some type of diverging trend to indicate a change in types of beer popularity (my hypothesis), I'm not sure that is evident. The `Hops (dry)` variable obviously does something crazy in 2015-2016, but I'm not sure I trust that much of an increase beween 2014 and 2015 either. 
 
-Nevertheless, lets keep going with an effort now towards modeling this time series between 2008 and the end of 2014 (somewhat cleanish/valid data). Just to zoom in a bit, I'd like to examine the seasonality of `Malt and malt products`. 
+Nevertheless, lets keep going with an effort now towards modeling this time series between 2008 and the end of 2013 (somewhat cleanish/valid data). Just to zoom in a bit, I'd like to examine the seasonality of `Malt and malt products`. 
 
 ```{r}
 hops2 <- brewing_materials %>%
   mutate(date = make_date(year, month)) %>%
-  filter(date >= '2008-01-01' & date <= '2014-01-01') %>%
+  filter(date >= '2008-01-01' & date <= '2013-12-01') %>%
   group_by(date, type) %>%  
   summarize(avg = mean(month_current)) %>% ungroup() %>%
   filter(type == 'Malt and malt products') %>%
@@ -105,10 +100,11 @@ library(tsibble)
 tsibble <- as_tsibble(hops2, index = date, key = type)
 ```
 
-
 ```{r}
 class(tsibble$date)
+head(tsibble$date)
 ```
+
 
 I fought with this for a good while. Lesson learned. Although this variable `ts$date` identifies as a 'Date' variable, it is not in the right or correct interval. 
 
@@ -143,7 +139,7 @@ class(tsibble)
 Visualize using the TSstudio package from `Rami Krispin`, which takes a ts object as input for graphics. So lets make a ts object, as opposed to the tsibble. 
 ```{r , out.width='100%', out.height='100%'}
 library(TSstudio) 
-seasonal <- ts(data = tsibble$avg, start = c(2008, 1), end = c(2014, 1), frequency = 12)
+seasonal <- ts(data = tsibble$avg, start = c(2008, 1), end = c(2013, 12), frequency = 12)
 ts_plot(seasonal,
         line.mode = "lines+markers",
         Ygrid = T, slider = T,
@@ -151,20 +147,25 @@ ts_plot(seasonal,
         Ytitle = "Millions of Barrels")
 ```
 
-```{r}
+To better understand the seaonality, we can examine the autocorrelation and the partial autocorrelation functions from their correlograms (such a great name!). 
+```{r , out.width='100%', out.height='100%'}
 ts_cor(seasonal, seasonal_lags = 12, lag.max = 60)
 ```
 
+In this case (considering approximate stationarity--I've venturing to difference in this post), it is evident that this is an autocorrelated series with clear declining trend--as presented by the ACF plot's clear decline over time. In this case, there seems to be a clear higher-order autoregressive term in the data. 
+
+To examine this term we can use the PACF plot, which looks at the residuals of the ACF (essentially), which suggests that most of the autocorrelation across seasons is simply because of the strong lag-1 autocorrelation. We will keep this in the model. 
+ 
 
 ```{r , out.width='100%', out.height='100%'}
-ts_seasonal(seasonal, type = "all")
+ts_seasonal(seasonal, type = 'all')
 ```
 
+From this, it appears there is a strong sesonality--with a bit of obvious variability. However, there does appear to be a noticable decline across the entire year as time moves. This trend is also evident in the plot above this one, whereby there appears to be a fairly linear decline over time. 
 
+I'll use a developmental R package `forecastLM` to examine the seasonality. You can find more details [here](https://github.com/RamiKrispin/forecastLM). 
 
-From this, it appears there is a strong montly sesonality--with a bit of variability. However, there does appear to be a noticable decline across the entire year as time moves. This trend is also evident in the plot above this one, whereby there appears to be a fairly linear decline over time. 
-
-I'll use a developmental R package `forecastLM` to examine this trend. You can find more details [here](https://github.com/RamiKrispin/forecastLM). 
+Initial model. 
 
 ```{r}
 library(forecastLM)
@@ -178,23 +179,7 @@ lm1 <- trainLM(input = tsibble,
 summary(lm1$model)
 ```
 
-```{r}
-lm1.1 <- trainLM(input = seasonal,
-               y = "avg",
-               trend = list(linear = TRUE),
-               seasonal = "month")
-```
-
-```{r}
-summary(lm1.1$model)
-```
-
-
-```{r , out.width='100%', out.height='100%'}
-plot_res(lm1.1)
-```
-
-It appears there is a bit of residual correlations, so lets see if we can improve the model by accounting for the lag. 
+To see how much the ar1 can help, we can put a lag in. 
 
 ```{r}
 lm2  <- trainLM(input = tsibble,
@@ -205,17 +190,14 @@ lm2  <- trainLM(input = tsibble,
 ```
 
 ```{r}
-
-```
-
-
-```{r}
 summary(lm2$model)
 ```
 
 ```{r , out.width='100%', out.height='100%'}
 plot_res(lm2)
 ```
+
+The `forecastLM` package allows us to account for transform, use a stepwise approach, and add in unique events or outliers. Although I dont show it here, there is also an option to take spline regression approach. 
 
 ```{r}
 events <- list(outlier = c(as_date("2009-01-01"), as_date("2009-09-01"), as_date("2010-05-01"), as_date("2010-12-01"), as_date("2014-12-01"), as_date("2011-09-01")))
@@ -226,7 +208,6 @@ lm3  <- trainLM(input = seasonal,
                lags = c(1),
                step = TRUE,
                events = events)
-               #scale = "log")
 ```
 
 ```{r}
@@ -237,7 +218,7 @@ summary(lm3$model)
 plot_res(lm3)
 ```
 
-Now that we have a prediction model that accounts for roughly 87% of the variability, we can look and see what this may have looked like with somewhat clean data or consistent reporting. 
+Now that we have a prediction model that accounts for roughly 90% of the variability, we can look and see what this may have looked like with somewhat clean data or consistent reporting. 
 
 ```{r} 
 # Using the lm3 prediction model. 
@@ -246,11 +227,9 @@ fc3 <- forecastLM(lm3, h = 24)
 
 ```{r , out.width='100%', out.height='100%'}
 # Plot it.
-plot_fc(fc3, theme = 'darkBlue')
+plot_fc(fc3, theme = 'classic')
 ```
 
-```{r}
-library(forecast)
+Again, this was just a venture into using these two packages, not a full EDA or true statistical analysis. In all honesty, I do not often inspect seasonality or such trends in my own work, so I'm still learning. 
 
-```
-
+Cheers. 
