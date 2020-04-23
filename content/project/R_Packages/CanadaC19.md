@@ -1,6 +1,6 @@
 ---
 aliases: [arm]
-title: Canadian Covid19 Data Scraper for Covid19R Project - CanadaC19
+title: CanadaC19
 summary: Imports and cleans data from a repository that includes open-source case data of COVID-19 in Canada.
 abstract: ""
 date: "2020-04-23T00:00:00Z"
