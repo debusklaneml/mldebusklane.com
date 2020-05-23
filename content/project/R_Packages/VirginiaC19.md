@@ -17,7 +17,7 @@ links:
   name: Link to GitHub
   url: https://github.com/debusklaneml/VirginiaC19
 
-categories:
+categories: 
 - Code
 
 tags:
