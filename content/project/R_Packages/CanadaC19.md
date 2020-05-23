@@ -27,3 +27,7 @@ tags:
 ---
 
 This package, currently under CRAN review, harvests data from a repository that has collected various open-sourced data from across Canada (https://github.com/ishaberry/Covid19Canada). This package is a contribution to the Covid19R project. More can be found here: https://github.com/Covid19R
+
+https://debusklaneml.github.io/CanadaC19/
+
+devtools::install_github("debusklaneml/CanadaC19")
