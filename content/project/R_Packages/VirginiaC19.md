@@ -27,7 +27,7 @@ tags:
 ---
 
 This package scrapes data from the Virginia Department of Health and wrangles it into a tidy data source inline with the COVID19R effort. More details can be found here: https://github.com/Covid19R/covid19R
-
+ 
 https://debusklaneml.github.io/VirginiaC19/
 
 devtools::install_github("debusklaneml/VirginiaC19")
