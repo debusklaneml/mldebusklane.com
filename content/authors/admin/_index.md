@@ -1,6 +1,6 @@
 ---
 # Display name
-name: Morgan DeBusk-Lane
+name: Morgan 'Les' DeBusk-Lane
 
 # Username (this should match the folder name)
 authors:
