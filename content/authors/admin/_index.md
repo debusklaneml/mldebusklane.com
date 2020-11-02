@@ -10,12 +10,12 @@ authors:
 superuser: true
 
 # Role/position
-role: Data Scientist 
+role: Social Research Scientist
 
 # Organizations/Affiliations
 organizations:
-- name: "CCPS"
-  url: "https://mychesterfieldschools.com"
+- name: "Gallup"
+  url: "https://www.gallup.com"
 
 # Short bio (displayed in user profile at end of posts)
 bio: ""
@@ -69,6 +69,6 @@ user_groups:
 
 I am a data geek, aviator, father, husband, and one who easily gets lost in figuring out just about anything.
 
-My research focuses on writing self-efficacy and feedback, emotional reactivity, working memory, and various other musings such as creativity and intelligence in the student population. I am also deeply interested in unique quantitative methods, mixtures models, measurement design, machine learning, and longitudinal growth.
+My personal research focuses on writing self-efficacy and feedback, emotional reactivity, working memory, and various other musings such as creativity and intelligence in the student population. I am also deeply interested in unique quantitative methods, mixtures models, measurement design, machine learning, and longitudinal growth.
 
-I am currently employed as an educational researcher and data scientist at a large school division in Virginia. I mainly wrangle data (#rstats), provide predictive analytics to optimize student success with unique groupings and machine learning, and help manage our data-warehouse that provides practitioners with vital data analytics to enable them to make data informed decisions.
+All opinions my own.
