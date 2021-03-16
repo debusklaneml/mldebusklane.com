@@ -6,7 +6,7 @@ slug: []
 categories: [Bayesian]
 tags: [simulation, regression]
 subtitle: ''
-summary: ''
+summary: 'Tidymodels Bayesian Multilevel'
 authors: []
 lastmod: '2021-01-22T06:57:57-05:00'
 featured: no
@@ -21,6 +21,35 @@ output:
     highlight: zenburn
 ---
 
-# This is a test.
+# Tidymodels Bayesian Multileve Models
 
-Hello there!
+This blog will focus on Tidymodels' new multilevel modeling capacity. 
+
+Although still in somewhat of a developmental condition, this new addition to Parsnip's growing list of modeling engines is great to see. 
+
+This supplies `stan-glmer` engines for `linear_reg()`, `logistic_reg()`, and `poisson_reg()`.
+
+Using this week's 
+
+
+
+
+```r
+# Load packages
+if (!require("pacman")) install.packages("pacman")
+```
+
+```
+## Loading required package: pacman
+```
+
+```r
+pacman::p_load(tidyverse, tidymodels, multilevelmod, mnormt, tidylog)
+```
+
+To start, we need some data!!
+https://bookdown.org/marklhc/notes/simulating-multilevel-data.html
+
+
+
+
