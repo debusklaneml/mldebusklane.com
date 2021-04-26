@@ -1,0 +1,41 @@
+---
+title: 'Simulation - Part 1'
+author: M. L. DeBusk-Lane
+date: '2021-01-22'
+slug: []
+categories: [Simulation]
+tags: [multi-level regression]
+subtitle: ''
+summary: 'Linear and Linear Multilevel Data Simulation'
+authors: []
+lastmod: '2021-01-22T06:57:57-05:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+output: 
+  html_document:
+    theme: journal
+    highlight: zenburn
+---
+ 
+There is something very satisfying, reassuring, and down-right compelling to making your own data, establishing known paramters, and then seeing how particular methods work to recover them. In graduate school I found this utility increasingly useful in exploring methods and, more importantly, learning them. 
+
+## Linear Data Generation 
+
+https://aosmith.rbind.io/2018/01/09/simulate-simulate-part1/
+
+$$y_t = \beta_0 + \beta_1*I_{(group_t=\textit{group2})} + \epsilon_t$$
+
+
++ $y_t $ is the observed values for the quantitative response variable; $t$ goes from 1 to the number of observations in the dataset  
++ $\beta_0$ is the mean response variable when the group is *group1*
++ $\beta_1$ is the difference in mean response between the two groups, *group2* minus *group1*.  
++ The indicator variable, $I_{(group_t=\textit{group2})}$, is 1 when the group is *group2* and 0 otherwise, so $\beta_1$ only affects the response variable for observations in *group2*
++ $\epsilon_t$ is the random variation present for each observation that is not explained by the group variable.  These are assumed to come from an iid normal distribution with a mean of 0 and some shared variance, $\sigma^2$: $\epsilon_t \thicksim N(0, \sigma^2)$
+
+
+
+## Multilevel Data Generation 

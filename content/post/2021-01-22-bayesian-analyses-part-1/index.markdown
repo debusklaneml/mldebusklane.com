@@ -44,12 +44,48 @@ if (!require("pacman")) install.packages("pacman")
 ```
 
 ```r
-pacman::p_load(tidyverse, tidymodels, multilevelmod, mnormt, tidylog)
+pacman::p_load(tidyverse, tidymodels, tidylog)
 ```
 
 To start, we need some data!!
-https://bookdown.org/marklhc/notes/simulating-multilevel-data.html
 
+Lets take a brief (but not so brief) detour to simulate some data. 
+
+Make a new simulation post... 
+
+
+
+
+
+
+
+
+
+
+
+
+```r
+set.seed(1234) #for reproducability
+nG <- 250 #number of groups
+nJ <- 18 #cluster size
+W1 <- 2 #level 2 coeff
+X1 <- 3 #level 1 coeff
+
+tmp2 <- rnorm(nG) #generate 20 random numbers, m = 0, sd = 1
+l2 <- rep(tmp2, each = nJ) #all units in l2 have the same value
+group <- gl(nG, k = nJ) #creating cluster variable
+tmp2 <- rnorm(nG) #error term for level 2
+err2 <- rep(tmp2, each = nJ) #all units in l2 have the same value
+
+l1 <- rnorm(nG * nJ) #total sample size is nG * nJ
+err1 <- rnorm(nG * nJ) #level 1 
+
+#putting it all together
+y <- W1 * l2 + X1 * l1 + err2 + err1
+dat <- data.frame(y, group, l2, err2,l1, err1)
+```
+
+Given that we now have our data, let's take a peak at the coefficients--just for clarity. 
 
 
 

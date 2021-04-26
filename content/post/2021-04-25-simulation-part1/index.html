@@ -1,0 +1,44 @@
+---
+title: 'Simulation - Part 1'
+author: M. L. DeBusk-Lane
+date: '2021-01-22'
+slug: []
+categories: [Simulation]
+tags: [multi-level regression]
+subtitle: ''
+summary: 'Linear and Linear Multilevel Data Simulation'
+authors: []
+lastmod: '2021-01-22T06:57:57-05:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+output: 
+  html_document:
+    theme: journal
+    highlight: zenburn
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>There is something very satisfying, reassuring, and down-right compelling to making your own data, establishing known paramters, and then seeing how particular methods work to recover them. In graduate school I found this utility increasingly useful in exploring methods and, more importantly, learning them.</p>
+<div id="linear-data-generation" class="section level2">
+<h2>Linear Data Generation</h2>
+<p><a href="https://aosmith.rbind.io/2018/01/09/simulate-simulate-part1/" class="uri">https://aosmith.rbind.io/2018/01/09/simulate-simulate-part1/</a></p>
+<p><span class="math display">\[y_t = \beta_0 + \beta_1*I_{(group_t=\textit{group2})} + \epsilon_t\]</span></p>
+<ul>
+<li>$y_t $ is the observed values for the quantitative response variable; <span class="math inline">\(t\)</span> goes from 1 to the number of observations in the dataset<br />
+</li>
+<li><span class="math inline">\(\beta_0\)</span> is the mean response variable when the group is <em>group1</em></li>
+<li><span class="math inline">\(\beta_1\)</span> is the difference in mean response between the two groups, <em>group2</em> minus <em>group1</em>.<br />
+</li>
+<li>The indicator variable, <span class="math inline">\(I_{(group_t=\textit{group2})}\)</span>, is 1 when the group is <em>group2</em> and 0 otherwise, so <span class="math inline">\(\beta_1\)</span> only affects the response variable for observations in <em>group2</em></li>
+<li><span class="math inline">\(\epsilon_t\)</span> is the random variation present for each observation that is not explained by the group variable. These are assumed to come from an iid normal distribution with a mean of 0 and some shared variance, <span class="math inline">\(\sigma^2\)</span>: <span class="math inline">\(\epsilon_t \thicksim N(0, \sigma^2)\)</span></li>
+</ul>
+</div>
+<div id="multilevel-data-generation" class="section level2">
+<h2>Multilevel Data Generation</h2>
+</div>
