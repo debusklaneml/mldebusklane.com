@@ -24,10 +24,15 @@ output:
 <script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
 
 
-<p>There is something very satisfying, reassuring, and down-right compelling to making your own data, establishing known paramters, and then seeing how particular methods work to recover them. In graduate school I found this utility increasingly useful in exploring methods and, more importantly, learning them.</p>
+<p>There is something very satisfying, reassuring, and down-right compelling to making your own data, establishing known parameters, and then seeing how particular methods work to recover them. In graduate school I found this utility increasingly useful in exploring methods and, more importantly, learning them.</p>
+<p>So, in all, this post will cover the following:
+- The simulation of common linear data.
+- Preprocessing that data a number of ways and fitting some models to it to see how well we can do.
+-</p>
 <div id="linear-data-generation" class="section level2">
 <h2>Linear Data Generation</h2>
-<p><a href="https://aosmith.rbind.io/2018/01/09/simulate-simulate-part1/" class="uri">https://aosmith.rbind.io/2018/01/09/simulate-simulate-part1/</a></p>
+<p><a href="https://aosmith.rbind.io/2018/01/09/simulate-simulate-part1/" class="uri">https://aosmith.rbind.io/2018/01/09/simulate-simulate-part1/</a>
+<a href="https://www.markhw.com/blog/prequel-renaissance" class="uri">https://www.markhw.com/blog/prequel-renaissance</a></p>
 <p><span class="math display">\[y_t = \beta_0 + \beta_1*I_{(group_t=\textit{group2})} + \epsilon_t\]</span></p>
 <ul>
 <li>$y_t $ is the observed values for the quantitative response variable; <span class="math inline">\(t\)</span> goes from 1 to the number of observations in the dataset. Said aother way, this is the outcome, response variable, or what we are trying to predict with the right hand side of the equation.<br />
@@ -38,7 +43,7 @@ output:
 <li><span class="math inline">\(\epsilon_t\)</span> is the random variation present for each observation that is not explained by the group variable. These are assumed to come from an iid normal distribution with a mean of 0 and some shared variance, <span class="math inline">\(\sigma^2\)</span>: <span class="math inline">\(\epsilon_t \thicksim N(0, \sigma^2)\)</span> This is often called error.</li>
 </ul>
 <p>For reproducibility, lets grab a seed. Quick fact: If you dont explicitly note a new <code>set.seed(interger here)</code> the seed is created from the current time and process ID from your local? There’s actually a ton of information if you take a look at the help file for <code>set.seed()</code> You’re welcome.</p>
-<pre class="r"><code>set.seed(23120)</code></pre>
+<pre class="r"><code>set.seed(6276)</code></pre>
 <p>Let’s grab some packages/libraries. I use pacman… because just listing a bunch of libraries and hoping you have them installed is pretty rude. Just run the code, it’ll download what you need and not what you don’t.</p>
 <pre class="r"><code>if (!require(&quot;pacman&quot;)) install.packages(&quot;pacman&quot;)</code></pre>
 <pre><code>## Loading required package: pacman</code></pre>
@@ -46,6 +51,206 @@ output:
   tidyverse,
   tidymodels
 )</code></pre>
+<p>To start, we need to define the model parameters. As stated in the equation above, we need to know a few key items of information to simulate data. We need to know how many groups (2), how many observations we’ll create, the beta values, and some type of variability.</p>
+<pre class="r"><code>num_groups = 2
+n_rep = 10
+b0 = 5
+b1 = -2
+sd = 2</code></pre>
+<p>Creating the grouping variable. T</p>
+<pre class="r"><code>group &lt;- rep(c(&quot;group1&quot;, &quot;group2&quot;), each = n_rep)</code></pre>
+<p>This just creates a character vector that repeates <code>"group1, "group2"</code> each n_rep times.</p>
+<pre class="r"><code>group</code></pre>
+<pre><code>##  [1] &quot;group1&quot; &quot;group1&quot; &quot;group1&quot; &quot;group1&quot; &quot;group1&quot; &quot;group1&quot; &quot;group1&quot; &quot;group1&quot;
+##  [9] &quot;group1&quot; &quot;group1&quot; &quot;group2&quot; &quot;group2&quot; &quot;group2&quot; &quot;group2&quot; &quot;group2&quot; &quot;group2&quot;
+## [17] &quot;group2&quot; &quot;group2&quot; &quot;group2&quot; &quot;group2&quot;</code></pre>
+<p>Using the <code>rnorm</code> function, I’ll randomly sample from a distribution established from the predefined <code>sd</code>. Given we have two groups of 10, we’ll need to sample 20 data points for each observation.</p>
+<pre class="r"><code>error &lt;- rnorm(n = num_groups*n_rep, mean = 0, sd = sd)</code></pre>
+<p>Now that we have established all the parameters of the equation, we can <code>simulate</code> the outcome data.</p>
+<pre class="r"><code>outcome &lt;- b0 + b1*(group == &#39;group2&#39;) + error</code></pre>
+<pre class="r"><code>outcome</code></pre>
+<pre><code>##  [1]  5.2577833  5.5099871  3.0545356  3.3906047  9.0422713  5.0205190
+##  [7]  6.3343165  6.3868345  3.2658158  2.7174145  6.4299542  5.1188455
+## [13] -0.8778727  4.9397362  2.8598414  1.9822569  2.2882023  3.1764186
+## [19]  5.5834277  2.6816001</code></pre>
+<p>Because we dont really care how the groups are differentiated across the <code>outcome</code> data, well push the two data columns together.</p>
+<pre class="r"><code>data &lt;- data.frame(group, outcome)</code></pre>
+<p>Let’s take a look.</p>
+<pre class="r"><code>skimr::skim(data)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-10">Table 1: </span>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">data</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">20</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">2</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left">numeric</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">group</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">6</td>
+<td align="right">6</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+<th align="left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">outcome</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4.21</td>
+<td align="right">2.17</td>
+<td align="right">-0.88</td>
+<td align="right">2.82</td>
+<td align="right">4.17</td>
+<td align="right">5.53</td>
+<td align="right">9.04</td>
+<td align="left">▁▇▆▇▁</td>
+</tr>
+</tbody>
+</table>
+<p>Ok, cool. We have a data generation mechninism. Now, methodologically, we’d replicate this process many times and analyze the data with some method (OLS, etc.) many times, collect those estimates, average them, and analyze them. To this point, the random generation of numerous data sets and the analyses thereafter, search to approximate the true value of the inherently random data.</p>
+<p>First, however, lets visualize these data… just to be sure we know what we’re dealing with… at least generally.</p>
+<pre class="r"><code>data %&gt;% 
+  ggplot(aes(x = group, y = outcome)) + 
+  geom_point() + 
+  geom_violin(alpha = .2)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>Aight, looking good so far. Pretty tough to see with just 20 observations. That’s the beauty, we can crank it up. But first, let’s make this a bit easier and push this to a function.</p>
+<pre class="r"><code>two_group_data_sim &lt;- function(n_rep = 10, b0 = 5, b1 = -2, sigma = 2) {
+  num_groups &lt;- 2
+  group &lt;- rep(c(&quot;group1&quot;, &quot;group2&quot;), each = n_rep)
+  error &lt;- rnorm(n = num_groups * n_rep, mean = 0, sd = sigma)
+  outcome &lt;- b0 + b1 * (group == &quot;group2&quot;) + error
+  simdat &lt;- data.frame(group, outcome)
+  return(simdat)
+}</code></pre>
+<pre class="r"><code>simdat &lt;- two_group_data_sim(n_rep = 2500, b0 = 5, b1 = -2, sigma = 2)</code></pre>
+<p>Now we’re talking… 5000 observations.</p>
+<pre class="r"><code>simdat %&gt;% 
+  ggplot(aes(x = group, y = outcome)) + 
+  geom_point() + 
+  geom_violin(alpha = .2)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>Ok, this is a bit more in line with what I’d expect with a larger dataset.</p>
+<p>Now, to asses how good any analytic method does at rendering a model of this data, let’s do this a few thousand times and average it… but first, we’ll add a simple regression in there too.</p>
+<pre class="r"><code>two_group_data_sim_ols &lt;- function(n_rep = 10, b0 = 5, b1 = -2, sigma = 2) {
+  num_groups &lt;- 2
+  group &lt;- rep(c(&quot;group1&quot;, &quot;group2&quot;), each = n_rep)
+  error &lt;- rnorm(n = num_groups * n_rep, mean = 0, sd = sigma)
+  outcome &lt;- b0 + b1 * (group == &quot;group2&quot;) + error
+  simdat &lt;- data.frame(group, outcome)
+  model_fit = lm(outcome ~ group, data = simdat)
+  model_fit
+}</code></pre>
+<p>Just in it’s default form:</p>
+<pre class="r"><code>set.seed(100)
+two_group_data_sim_ols()</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = outcome ~ group, data = simdat)
+## 
+## Coefficients:
+## (Intercept)  groupgroup2  
+##       4.964       -1.497</code></pre>
+<p>Without that random seed, the random drawing of variables, especially with such a small number of default observations, tends to vary a bit across the recovered parameters. Let’s crank this up a bit.</p>
+<p>We’ll use the <code>purrr</code>’s <code>rerun</code> function here.</p>
+<pre class="r"><code>sim &lt;- rerun(.n = 2000, two_group_data_sim_ols())</code></pre>
+<p>Now, to recover the parameters across the 2000 models we estimated, we’ll use</p>
+<pre class="r"><code>sim_df &lt;- sim %&gt;% 
+  map_df(tidy)
+
+sim_df</code></pre>
+<pre><code>## # A tibble: 4,000 x 5
+##    term        estimate std.error statistic       p.value
+##    &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;
+##  1 (Intercept)     4.74     0.449     10.6  0.00000000378
+##  2 groupgroup2    -1.11     0.634     -1.76 0.0962       
+##  3 (Intercept)     5.01     0.867      5.78 0.0000176    
+##  4 groupgroup2    -2.10     1.23      -1.71 0.104        
+##  5 (Intercept)     5.39     0.700      7.70 0.000000419  
+##  6 groupgroup2    -3.21     0.990     -3.24 0.00457      
+##  7 (Intercept)     5.16     0.738      6.99 0.00000159   
+##  8 groupgroup2    -2.56     1.04      -2.46 0.0244       
+##  9 (Intercept)     4.91     0.556      8.83 0.0000000583 
+## 10 groupgroup2    -1.86     0.786     -2.36 0.0297       
+## # … with 3,990 more rows</code></pre>
+<p>As you can see, each model encompasses two lines–an intercept and a B1 value. In this case, given we know the true data parameters for which randomized draws were taken, we can expec the intercept to be 5 and the coefficient for the grouping variable to be -2. Although, given the variability we established across the random draws, we’d expect these values to vary themselves.</p>
+<pre class="r"><code>sim_df %&gt;%
+  filter(term == &quot;groupgroup2&quot;) %&gt;%
+  ggplot(aes(x = estimate)) +
+  geom_density(fill = &quot;blue&quot;, alpha = .5) +
+  geom_vline(xintercept = -2)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
 </div>
 <div id="multilevel-data-generation" class="section level2">
 <h2>Multilevel Data Generation</h2>

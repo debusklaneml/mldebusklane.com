@@ -21,11 +21,20 @@ output:
     highlight: zenburn
 ---
  
-There is something very satisfying, reassuring, and down-right compelling to making your own data, establishing known paramters, and then seeing how particular methods work to recover them. In graduate school I found this utility increasingly useful in exploring methods and, more importantly, learning them. 
+There is something very satisfying, reassuring, and down-right compelling to making your own data, establishing known parameters, and then seeing how particular methods work to recover them. In graduate school I found this utility increasingly useful in exploring methods and, more importantly, learning them. 
+
+So, in all, this post will cover the following: 
+- The simulation of common linear data.
+- Preprocessing that data a number of ways and fitting some models to it to see how well we can do.
+- 
+
+
+
 
 ## Linear Data Generation 
 
 https://aosmith.rbind.io/2018/01/09/simulate-simulate-part1/
+https://www.markhw.com/blog/prequel-renaissance
 
 $$y_t = \beta_0 + \beta_1*I_{(group_t=\textit{group2})} + \epsilon_t$$
 
@@ -39,7 +48,7 @@ $$y_t = \beta_0 + \beta_1*I_{(group_t=\textit{group2})} + \epsilon_t$$
 For reproducibility, lets grab a seed. Quick fact: If you dont explicitly note a new `set.seed(interger here)` the seed is created from the current time and process ID from your local? There's actually a ton of information if you take a look at the help file for `set.seed()` You're welcome. 
 
 ```{r}
-set.seed(23120)
+set.seed(6276)
 ```
 
 
@@ -52,13 +61,144 @@ pacman::p_load(
   tidymodels
 )
 ```
-```{r}
 
+To start, we need to define the model parameters. As stated in the equation above, we need to know a few key items of information to simulate data. We need to know how many groups (2), how many observations we'll create, the beta values, and some type of variability. 
+
+```{r}
+num_groups = 2
+n_rep = 10
+b0 = 5
+b1 = -2
+sd = 2
+```
+
+Creating the grouping variable. T
+
+```{r}
+group <- rep(c("group1", "group2"), each = n_rep)
+```
+
+This just creates a character vector that repeates `"group1, "group2"` each n_rep times. 
+
+```{r}
+group
+```
+
+Using the `rnorm` function, I'll randomly sample from a distribution established from the predefined `sd`. Given we have two groups of 10, we'll need to sample 20 data points for each observation. 
+
+```{r}
+error <- rnorm(n = num_groups*n_rep, mean = 0, sd = sd)
+```
+
+Now that we have established all the parameters of the equation, we can `simulate` the outcome data. 
+
+```{r}
+outcome <- b0 + b1*(group == 'group2') + error
+```
+
+```{r}
+outcome
+```
+
+Because we dont really care how the groups are differentiated across the `outcome` data, well push the two data columns together. 
+
+```{r}
+data <- data.frame(group, outcome)
+```
+
+Let's take a look. 
+
+```{r}
+skimr::skim(data)
+```
+
+Ok, cool. We have a data generation mechninism. Now, methodologically, we'd replicate this process many times and analyze the data with some method (OLS, etc.) many times, collect those estimates, average them, and analyze them. To this point, the random generation of numerous data sets and the analyses thereafter, search to approximate the true value of the inherently random data. 
+
+First, however, lets visualize these data... just to be sure we know what we're dealing with... at least generally. 
+
+```{r}
+data %>% 
+  ggplot(aes(x = group, y = outcome)) + 
+  geom_point() + 
+  geom_violin(alpha = .2)
+```
+
+Aight, looking good so far. Pretty tough to see with just 20 observations. That's the beauty, we can crank it up. But first, let's make this a bit easier and push this to a function. 
+
+```{r}
+two_group_data_sim <- function(n_rep = 10, b0 = 5, b1 = -2, sigma = 2) {
+  num_groups <- 2
+  group <- rep(c("group1", "group2"), each = n_rep)
+  error <- rnorm(n = num_groups * n_rep, mean = 0, sd = sigma)
+  outcome <- b0 + b1 * (group == "group2") + error
+  simdat <- data.frame(group, outcome)
+  return(simdat)
+}
+```
+
+```{r}
+simdat <- two_group_data_sim(n_rep = 2500, b0 = 5, b1 = -2, sigma = 2)
+```
+
+Now we're talking... 5000 observations. 
+
+```{r}
+simdat %>% 
+  ggplot(aes(x = group, y = outcome)) + 
+  geom_point() + 
+  geom_violin(alpha = .2)
+```
+
+Ok, this is a bit more in line with what I'd expect with a larger dataset. 
+
+Now, to asses how good any analytic method does at rendering a model of this data, let's do this a few thousand times and average it... but first, we'll add a simple regression in there too. 
+
+```{r}
+two_group_data_sim_ols <- function(n_rep = 10, b0 = 5, b1 = -2, sigma = 2) {
+  num_groups <- 2
+  group <- rep(c("group1", "group2"), each = n_rep)
+  error <- rnorm(n = num_groups * n_rep, mean = 0, sd = sigma)
+  outcome <- b0 + b1 * (group == "group2") + error
+  simdat <- data.frame(group, outcome)
+  model_fit = lm(outcome ~ group, data = simdat)
+  model_fit
+}
+```
+
+Just in it's default form: 
+
+```{r}
+set.seed(100)
+two_group_data_sim_ols()
+```
+
+Without that random seed, the random drawing of variables, especially with such a small number of default observations, tends to vary a bit across the recovered parameters. Let's crank this up a bit. 
+
+We'll use the `purrr`'s `rerun` function here. 
+
+```{r}
+sim <- rerun(.n = 2000, two_group_data_sim_ols())
+```
+
+Now, to recover the parameters across the 2000 models we estimated, we'll use 
+
+```{r}
+sim_df <- sim %>% 
+  map_df(tidy)
+
+sim_df
+```
+
+As you can see, each model encompasses two lines--an intercept and a B1 value. In this case, given we know the true data parameters for which randomized draws were taken, we can expec the intercept to be 5 and the coefficient for the grouping variable to be -2. Although, given the variability we established across the random draws, we'd expect these values to vary themselves. 
+
+```{r}
+sim_df %>%
+  filter(term == "groupgroup2") %>%
+  ggplot(aes(x = estimate)) +
+  geom_density(fill = "blue", alpha = .5) +
+  geom_vline(xintercept = -2)
 ```
 
 
 
-
-
- 
 ## Multilevel Data Generation 
