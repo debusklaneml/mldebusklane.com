@@ -189,7 +189,7 @@ sim_df <- sim %>%
 sim_df
 ```
 
-As you can see, each model encompasses two lines--an intercept and a B1 value. In this case, given we know the true data parameters for which randomized draws were taken, we can expec the intercept to be 5 and the coefficient for the grouping variable to be -2. Although, given the variability we established across the random draws, we'd expect these values to vary themselves. 
+As you can see, each model encompasses two lines--an intercept and a B1 value. In this case, given we know the true data parameters for which randomized draws were taken, we can expect the intercept to be 5 and the coefficient for the grouping variable to be -2. Although, given the variability we established across the random draws, we'd expect these values to vary themselves. 
 
 ```{r}
 sim_df %>%
@@ -202,3 +202,6 @@ sim_df %>%
 
 
 ## Multilevel Data Generation 
+
+
+## tidymodels mlm

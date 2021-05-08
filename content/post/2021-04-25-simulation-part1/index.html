@@ -244,7 +244,7 @@ sim_df</code></pre>
 ##  9 (Intercept)     4.91     0.556      8.83 0.0000000583 
 ## 10 groupgroup2    -1.86     0.786     -2.36 0.0297       
 ## # … with 3,990 more rows</code></pre>
-<p>As you can see, each model encompasses two lines–an intercept and a B1 value. In this case, given we know the true data parameters for which randomized draws were taken, we can expec the intercept to be 5 and the coefficient for the grouping variable to be -2. Although, given the variability we established across the random draws, we’d expect these values to vary themselves.</p>
+<p>As you can see, each model encompasses two lines–an intercept and a B1 value. In this case, given we know the true data parameters for which randomized draws were taken, we can expect the intercept to be 5 and the coefficient for the grouping variable to be -2. Although, given the variability we established across the random draws, we’d expect these values to vary themselves.</p>
 <pre class="r"><code>sim_df %&gt;%
   filter(term == &quot;groupgroup2&quot;) %&gt;%
   ggplot(aes(x = estimate)) +
@@ -254,4 +254,7 @@ sim_df</code></pre>
 </div>
 <div id="multilevel-data-generation" class="section level2">
 <h2>Multilevel Data Generation</h2>
+</div>
+<div id="tidymodels-mlm" class="section level2">
+<h2>tidymodels mlm</h2>
 </div>
