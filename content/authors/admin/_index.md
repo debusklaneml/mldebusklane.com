@@ -21,7 +21,7 @@ organizations:
 bio: ""
 
 interests:
-- Learner Motivation
+- Natural Language Processing
 - Predictive Modeling 
 - Latent Profile Analysis
 - Machine Learning
