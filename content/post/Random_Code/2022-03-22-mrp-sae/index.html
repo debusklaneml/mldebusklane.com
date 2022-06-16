@@ -1,0 +1,37 @@
+---
+title: Multiple Regression Post-Stratification
+author: admin
+date: '2022-03-22'
+slug: []
+categories:
+  - Code
+  - R
+tags:
+  - R
+  - SAE
+subtitle: ''
+summary: 'A comparison of MrP techniques'
+authors: [M. L. DeBusk-Lane]
+lastmod: '2022-03-22T20:18:32-04:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+output: 
+  html_document:
+    theme: journal
+    highlight: zenburn
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>I use various forms of <code>multiple-regression post-stratification</code> across various work projects, so I figured I’d use this space to look a bit deeper. I’ll dive into a fairly common MRP method, use some Bayesian methods, and also a machine learning approach.</p>
+<pre class="r"><code>if (!require(&quot;pacman&quot;)) install.packages(&quot;pacman&quot;)
+pacman::p_load(tidyverse, haven, here, autoMrP)</code></pre>
+<p>Let’s get some data. For simplicity, I’ll use the data found within the <code>autoMrP</code> package. These data come from the 2008 National Annenberg Election Studies (NAES). In essence, without diving in too deep, the data have a dichotomous outcome (‘Yes’)</p>
+<pre class="r"><code>data(&quot;taxes_census&quot;)
+data(&quot;taxes_survey&quot;)</code></pre>
+<p>Here is a start at somewhere to get larger data: <a href="https://www.kaggle.com/datasets/stackoverflow/stack-overflow-2018-developer-survey" class="uri">https://www.kaggle.com/datasets/stackoverflow/stack-overflow-2018-developer-survey</a></p>

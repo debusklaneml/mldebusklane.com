@@ -1,0 +1,49 @@
+---
+title: Multiple Regression Post-Stratification
+author: admin
+date: '2022-03-22'
+slug: []
+categories:
+  - Code
+  - R
+tags:
+  - R
+  - SAE
+subtitle: ''
+summary: 'A comparison of MrP techniques'
+authors: [M. L. DeBusk-Lane]
+lastmod: '2022-03-22T20:18:32-04:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+output: 
+  html_document:
+    theme: journal
+    highlight: zenburn
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
+                      tidy = "styler", fig.width = 8, fig.height = 7)
+```
+
+I use various forms of `multiple-regression post-stratification` across various work projects, so I figured I'd use this space to look a bit deeper. I'll dive into a fairly common MRP method, use some Bayesian methods, and also a machine learning approach.  
+
+```{r, message=FALSE}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, haven, here, autoMrP, tidycensus)
+```
+
+Let's get some data.  https://doi.org/10.7910/DVN/I0VEMG
+```{r}
+
+```
+
+
+
+```{r}
+```
+
