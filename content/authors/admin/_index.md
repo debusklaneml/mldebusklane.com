@@ -46,7 +46,7 @@ social:
   link: https://twitter.com/mldebusklane
 - icon: google-scholar
   icon_pack: ai
-  link: https://scholar.google.com/citations?user=QflYOjsAAAAJ&hl=en
+  link: https://scholar.google.com/citations?user=_aSxCv0AAAAJ&hl=en
 - icon: github
   icon_pack: fab
   link: https://github.com/debusklaneml
